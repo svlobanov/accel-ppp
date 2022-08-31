@@ -8,12 +8,12 @@ on:
       - master
 
 jobs:
-  Build-on-Ubuntu:
-  #if: ${{ false }} # disable for now
-  strategy:
-    fail-fast: false
-    matrix:
-      distro: ["ubuntu-22.04", "ubuntu-20.04"]
+  Run-Build-On-Ubuntu:
+    #if: ${{ false }} # disable for now
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["ubuntu-22.04", "ubuntu-20.04"]
     runs-on: ${{ matrix.distro }}
     steps:
       - name: Install build tools
