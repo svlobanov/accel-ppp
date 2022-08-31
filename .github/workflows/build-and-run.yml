@@ -103,13 +103,14 @@ jobs:
           echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
       - name: Set common vars
         run: |
-          echo "UNAME_R_ARCH="`uname -r | sed 's/-/ /g' | awk '{print $NF}'` >> $GITHUB_ENV
+          echo "UNAME_M_FIXED="`uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/` >> $GITHUB_ENV
           cat $GITHUB_ENV
+          echo $DISTRO
       - name: Install build tools
         run: >
           apt update && apt upgrade && apt dist-upgrade &&
           apt -y install git build-essential cmake gcc 
-            linux-headers-${{ env.UNAME_R_ARCH }}
+            linux-headers-${{ env.UNAME_M_FIXED }}
             git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -121,7 +122,7 @@ jobs:
         working-directory: ./build
         run: >
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/linux-headers-`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.UNAME_R_ARCH }}'` 
+          -DKDIR=/usr/src/linux-headers-`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.UNAME_M_FIXED }}'` 
           -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
           -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
