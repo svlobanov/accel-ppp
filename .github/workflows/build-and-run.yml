@@ -86,37 +86,23 @@ jobs:
     container:
       image: ${{ matrix.distro }}
     steps:
-      - name: Set common vars
-        run: |
-          echo "HEADERS_SUFFIX="`uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/` >> $GITHUB_ENV
-          echo "UNAME_M_FIXED="`uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/` >> $GITHUB_ENV
-      - name: Set vars for Debian 10
-        if: ${{ matrix.distro == 'debian:10' }}
-        run: |
-          echo "DISTRO=debian10" >> $GITHUB_ENV
-          echo "CPACK_TYPE=Debian10" >> $GITHUB_ENV
-      - name: Set vars for Debian 11
-        if: ${{ matrix.distro == 'debian:11' }}
-        run: |
-          echo "DISTRO=debian11" >> $GITHUB_ENV
-          echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
-      - name: Set vars for Debian 12
-        if: ${{ matrix.distro == 'debian:bookworm' }}
-        run: |
-          echo "DISTRO=debian12" >> $GITHUB_ENV
-          echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
-      - name: Set vars for Debian 18.04
-        if: ${{ matrix.distro == 'ubuntu:18.04' }}
-        run: |
-          echo "DISTRO=ubuntu18.04" >> $GITHUB_ENV
-          echo "CPACK_TYPE=Ubuntu18" >> $GITHUB_ENV
-          echo "HEADERS_SUFFIX=generic" >> $GITHUB_ENV
-      - name: Set vars for Debian 22.04
-        if: ${{ matrix.distro == 'ubuntu:22.04' }}
-        run: |
-          echo "DISTRO=ubuntu22.04" >> $GITHUB_ENV
-          echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
-          echo "HEADERS_SUFFIX=generic" >> $GITHUB_ENV
+      - name: Set Distro-specific Vars
+        run: >
+          HEADERS_SUFFIX=`uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/`;
+          DISTRO=`echo ${{ matrix.distro }} |  sed 's/://'`;
+          case "${{ matrix.distro }}" in
+          debian:bookworm) DISTRO=debian12; CPACK_TYPE=Debian11 ;;
+          debian:11) CPACK_TYPE=Debian11 ;;
+          debian:10) CPACK_TYPE=Debian10 ;;
+          ubuntu:22.04) CPACK_TYPE=Ubuntu20 ; HEADERS_SUFFIX=generic ;;
+          ubuntu:20.04) CPACK_TYPE=Ubuntu20 ; HEADERS_SUFFIX=generic ;;
+          ubuntu:18.04) CPACK_TYPE=Ubuntu18 ; HEADERS_SUFFIX=generic ;;
+          esac;
+          echo HEADERS_SUFFIX=$HEADERS_SUFFIX >> $GITHUB_ENV;
+          echo DISTRO=$DISTRO >> $GITHUB_ENV;
+          echo CPACK_TYPE=$CPACK_TYPE >> $GITHUB_ENV;
+          cat $GITHUB_ENV
+
       - name: Install build tools
         run: >
           apt update && apt -y upgrade && apt -y dist-upgrade &&
