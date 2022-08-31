@@ -145,7 +145,7 @@ jobs:
           accel-ppp_`git describe --tags --long | sed 's/^v//' | sed 's/-/+/' | sed 's/-/~/'`-1+${{ env.DISTRO }}_${{ env.UNAME_M }}.deb
       - name: Install debian package
         working-directory: ./build
-        run: sudo apt -y install ./accel-ppp*.deb
+        run: apt -y install ./accel-ppp*.deb
       #- name: Copy default config
       #  run: sudo cp /etc/accel-ppp.conf.dist /etc/accel-ppp.conf
       #- name: Start accel-ppp
