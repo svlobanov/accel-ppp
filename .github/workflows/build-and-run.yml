@@ -8,14 +8,27 @@ on:
       - master
 
 jobs:
-  Build:
-    #if: ${{ false }} # disable for now
+  Build-And-Run:
+    # if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
         distro: ["ubuntu-22.04", "ubuntu-20.04"]
     runs-on: ${{ matrix.distro }}
     steps:
+      - name: Set vars for Ubuntu 20.04
+        if: ${{ matrix.distro == 'ubuntu-20.04' }}
+        run: |
+          echo "DISTRO=ubuntu20.04" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
+      - name: Set vars for Ubuntu 22.04
+        if: ${{ matrix.distro == 'ubuntu-22.04' }}
+        run: |
+          echo "DISTRO=ubuntu22.04" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
+      - name: Set common vars
+        run: |
+          echo "UNAME_R="`uname -r` >> $GITHUB_ENV
       - name: Install build tools
         run: sudo apt update && sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
@@ -26,13 +39,34 @@ jobs:
         run: mkdir build
       - name: cmake
         working-directory: ./build
-        run: cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr -DKDIR=/usr/src/linux-headers-`uname -r` -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE -DCPACK_TYPE=Ubuntu20 ..
+        run: >
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-`uname -r` 
+          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
+          -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
         working-directory: ./build
         run: make
       - name: Generate debian package
         working-directory: ./build
         run: cpack -G DEB
+      - name: Rename accel-ppp deb package
+        working-directory: ./build
+        run: >
+          mv accel-ppp.deb 
+          accel-ppp_`git describe --tags --long | sed 's/^v//' | sed 's/-/+/' | sed 's/-/~/'`-1+${{ env.DISTRO }}_`uname -m`.deb
       - name: Install debian package
         working-directory: ./build
-        run: sudo apt -y install ./accel-ppp.deb
+        run: sudo apt -y install ./accel-ppp*.deb
+      - name: Start accel-ppp
+        run: systemctl start accel-ppp
+      - name: Check accel-ppp running status
+        run: systemctl status accel-ppp
+      - name: Check accel-ppp stat
+        run: accel-cmd show stat
+      - name: Upload .deb package as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-package-${{ matrix.distro }}-${{ env.UNAME_R }}
+          path: build/accel-ppp_*.deb
+          if-no-files-found: error
