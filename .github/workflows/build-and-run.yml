@@ -32,7 +32,7 @@ jobs:
         run: make
       - name: Generate debian package
         working-directory: ./build
-        run: cpack -G deb
+        run: cpack -G DEB
       - name: Install debian package
         working-directory: ./build
         run: sudo apt -y install ./accel-ppp.deb
