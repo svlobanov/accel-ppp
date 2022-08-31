@@ -58,6 +58,8 @@ jobs:
       - name: Install debian package
         working-directory: ./build
         run: sudo apt -y install ./accel-ppp*.deb
+      - name: Copy default config
+        run: cp /etc/accel-ppp.conf.dist /etc/accel-ppp.conf
       - name: Start accel-ppp
         run: sudo systemctl start accel-ppp
       - name: Check accel-ppp running status
