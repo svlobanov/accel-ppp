@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: ["debian:10", "debian:11", "ubuntu:22.04"]
+        distro: ["debian:10", "debian:11", "debian:bookworm", "ubuntu:22.04"]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.distro }}
@@ -100,17 +100,22 @@ jobs:
         run: |
           echo "DISTRO=debian11" >> $GITHUB_ENV
           echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
+      - name: Set vars for Debian 12
+        if: ${{ matrix.distro == 'debian:bookworm' }}
+        run: |
+          echo "DISTRO=debian12" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
       - name: Set vars for Debian 22.04
         if: ${{ matrix.distro == 'ubuntu:22.04' }}
         run: |
           echo "DISTRO=ubuntu22.04" >> $GITHUB_ENV
           echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
-          echo "HEADERS_SUFFIX="`generic` >> $GITHUB_ENV
+          echo "HEADERS_SUFFIX=generic" >> $GITHUB_ENV
       - name: Install build tools
         run: >
           apt update && apt -y upgrade && apt -y dist-upgrade &&
           apt -y install git build-essential cmake gcc 
-          linux-headers-generic
+          linux-headers-{{ env.HEADERS_SUFFIX }}
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
         uses: actions/checkout@v3
