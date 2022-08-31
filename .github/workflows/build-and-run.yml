@@ -9,7 +9,7 @@ on:
 
 jobs:
   Build-in-VM:
-    if: ${{ false }} # disable for now
+    #if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +56,7 @@ jobs:
       - name: Rename accel-ppp deb package
         working-directory: ./build
         run: >
-          mv accel-ppp.deb 
+          mv -v accel-ppp.deb 
           accel-ppp_`git describe --tags --long | sed 's/^v//' | sed 's/-/+/' | sed 's/-/~/'`-1+${{ env.DISTRO }}_`uname -m`.deb
       - name: Install debian package
         working-directory: ./build
@@ -141,22 +141,20 @@ jobs:
       - name: Rename accel-ppp deb package
         working-directory: ./build
         run: >
-          mv accel-ppp.deb 
+          mv -v accel-ppp.deb 
           accel-ppp_`git describe --tags --long | sed 's/^v//' | sed 's/-/+/' | sed 's/-/~/'`-1+${{ env.DISTRO }}_${{ env.UNAME_M }}.deb
       - name: Install debian package
         working-directory: ./build
         run: apt -y install ./accel-ppp*.deb
-      #- name: Copy default config
-      #  run: sudo cp /etc/accel-ppp.conf.dist /etc/accel-ppp.conf
-      #- name: Start accel-ppp
-      #  run: sudo systemctl start accel-ppp
-      #- name: Check accel-ppp running status
-      #  run: sudo systemctl status accel-ppp
-      #- name: Check accel-ppp stat
-      #  run: accel-cmd show stat
+      - name: Start accel-ppp with default config
+        run: accel-pppd -d -c /etc/accel-ppp.conf.dist
+      - name: Sleep for 1 sec
+        run: sleep 1
+      - name: Check accel-ppp stat
+        run: accel-cmd show stat
       - name: Upload .deb package as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: deb-package-${{ matrix.distro }}-${{ env.UNAME_M }}
+          name: deb-package-${{ env.DISTRO }}-${{ env.UNAME_M }}
           path: build/accel-ppp_*.deb
           if-no-files-found: error
