@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: ["debian:10", "debian:11", "debian:bookworm", "ubuntu:22.04"]
+        distro: ["debian:10", "debian:11", "debian:bookworm", "ubuntu:18.04", "ubuntu:22.04"]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.distro }}
@@ -105,6 +105,12 @@ jobs:
         run: |
           echo "DISTRO=debian12" >> $GITHUB_ENV
           echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
+      - name: Set vars for Debian 18.04
+        if: ${{ matrix.distro == 'ubuntu:18.04' }}
+        run: |
+          echo "DISTRO=ubuntu18.04" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Ubuntu18" >> $GITHUB_ENV
+          echo "HEADERS_SUFFIX=generic" >> $GITHUB_ENV
       - name: Set vars for Debian 22.04
         if: ${{ matrix.distro == 'ubuntu:22.04' }}
         run: |
@@ -123,6 +129,8 @@ jobs:
           fetch-depth: 0
       - name: mkdir build
         run: mkdir build
+      - name: Disable git security warnings
+        run: git config --global --add safe.directory '*'
       - name: cmake
         working-directory: ./build
         run: >
