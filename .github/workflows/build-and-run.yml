@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.distro }}
     steps:
       - name: Install build tools
-        run: sudo apt update && apt -y install git build-essential cmake gcc linux-headers-`uname -r` git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+        run: sudo apt update && sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
