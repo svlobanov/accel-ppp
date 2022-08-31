@@ -108,7 +108,7 @@ jobs:
           echo $DISTRO
       - name: Install build tools
         run: >
-          apt update && apt upgrade && apt dist-upgrade &&
+          apt update && apt -y upgrade && apt -y dist-upgrade &&
           apt -y install git build-essential cmake gcc 
           linux-headers-${{ env.UNAME_M_FIXED }}
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod
@@ -122,7 +122,7 @@ jobs:
         working-directory: ./build
         run: >
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/linux-headers-`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.UNAME_M_FIXED }}'` 
+          -DKDIR=/usr/src/`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.UNAME_M_FIXED }}'` 
           -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
           -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
