@@ -8,8 +8,8 @@ on:
       - master
 
 jobs:
-  Build-And-Run:
-    # if: ${{ false }} # disable for now
+  Build-in-VM:
+    if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
@@ -30,7 +30,10 @@ jobs:
         run: |
           echo "UNAME_R="`uname -r` >> $GITHUB_ENV
       - name: Install build tools
-        run: sudo apt update && sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+        run: >
+          sudo apt update && 
+          sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` 
+            git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
@@ -72,3 +75,58 @@ jobs:
           name: deb-package-${{ matrix.distro }}-${{ env.UNAME_R }}
           path: build/accel-ppp_*.deb
           if-no-files-found: error
+
+  Build-in-Container:
+    #if: ${{ false }} # disable for now
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["debian:10", "debian:11", "ubuntu:22.04"]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.distro }}
+    steps:
+      - name: Set vars for Debian 10
+        if: ${{ matrix.distro == 'debian:10' }}
+        run: |
+          echo "DISTRO=debian10" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Debian10" >> $GITHUB_ENV
+      - name: Set vars for Debian 11
+        if: ${{ matrix.distro == 'debian:11' }}
+        run: |
+          echo "DISTRO=debian11" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Debian11" >> $GITHUB_ENV
+      - name: Set vars for Debian 22.04
+        if: ${{ matrix.distro == 'ubuntu:22.04' }}
+        run: |
+          echo "DISTRO=ubuntu22.04" >> $GITHUB_ENV
+          echo "CPACK_TYPE=Ubuntu20" >> $GITHUB_ENV
+      - name: Set common vars
+        run: |
+          echo "UNAME_R_ARCH="`uname -r | sed 's/-/ /g' | awk '{print $NF}'` >> $GITHUB_ENV
+          cat $GITHUB_ENV
+      - name: Install build tools
+        run: >
+          apt update && apt upgrade && apt dist-upgrade &&
+          apt -y install git build-essential cmake gcc 
+            linux-headers-${{ env.UNAME_R_ARCH }}
+            git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: mkdir build
+        run: mkdir build
+      - name: cmake
+        working-directory: ./build
+        run: >
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.UNAME_R_ARCH }}'` 
+          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
+          -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
+      - name: make
+        working-directory: ./build
+        run: make
+      - name: Generate debian package
+        working-directory: ./build
+        run: cpack -G DEB
