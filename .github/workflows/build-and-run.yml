@@ -59,9 +59,9 @@ jobs:
         working-directory: ./build
         run: sudo apt -y install ./accel-ppp*.deb
       - name: Start accel-ppp
-        run: systemctl start accel-ppp
+        run: sudo systemctl start accel-ppp
       - name: Check accel-ppp running status
-        run: systemctl status accel-ppp
+        run: sudo systemctl status accel-ppp
       - name: Check accel-ppp stat
         run: accel-cmd show stat
       - name: Upload .deb package as artifact
