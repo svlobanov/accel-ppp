@@ -100,10 +100,10 @@ jobs:
           HEADERS_SUFFIX=`uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/`;
           DISTRO=`echo ${{ matrix.distro }} |  sed 's/://'`;
           case "${{ matrix.distro }}" in
-          debian:bookworm) DISTRO=debian12; CPACK_TYPE=Debian11 ;;
+          debian:bookworm) DISTRO=debian12; CPACK_TYPE=Debian12 ;;
           debian:11) CPACK_TYPE=Debian11 ;;
           debian:10) CPACK_TYPE=Debian10 ;;
-          ubuntu:22.04) CPACK_TYPE=Ubuntu20 ; HEADERS_SUFFIX=generic ;;
+          ubuntu:22.04) CPACK_TYPE=Ubuntu22 ; HEADERS_SUFFIX=generic ;;
           ubuntu:20.04) CPACK_TYPE=Ubuntu20 ; HEADERS_SUFFIX=generic ;;
           ubuntu:18.04) CPACK_TYPE=Ubuntu18 ; HEADERS_SUFFIX=generic ;;
           esac;
