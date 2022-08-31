@@ -117,6 +117,8 @@ jobs:
           apt -y install git build-essential cmake gcc 
           linux-headers-${{ env.HEADERS_SUFFIX }}
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+      - name: Show packages (debug)
+        run: dpkg --list
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
