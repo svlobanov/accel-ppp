@@ -1,0 +1,38 @@
+name: Build and Run
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  Build-on-Ubuntu:
+  #if: ${{ false }} # disable for now
+  strategy:
+    fail-fast: false
+    matrix:
+      distro: ["ubuntu-22.04", "ubuntu-20.04"]
+    runs-on: ${{ matrix.distro }}
+    steps:
+      - name: Install build tools
+        run: apt update && apt -y install git build-essential cmake gcc linux-headers-`uname -r` git libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: mkdir build
+        run: mkdir build
+      - name: cmake
+        working-directory: ./build
+        run: cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr -DKDIR=/usr/src/linux-headers-`uname -r` -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE -DCPACK_TYPE=Ubuntu20 ..
+      - name: make
+        working-directory: ./build
+        run: make
+      - name: Generate debian package
+        working-directory: ./build
+        run: cpack -G deb
+      - name: Install debian package
+        working-directory: ./build
+        run: apt -y install ./accel-ppp.deb
