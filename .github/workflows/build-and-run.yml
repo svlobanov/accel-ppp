@@ -110,13 +110,17 @@ jobs:
           echo CPACK_TYPE=$CPACK_TYPE >> $GITHUB_ENV;
           echo UNAME_M=`uname -m` >> $GITHUB_ENV;
           cat $GITHUB_ENV
-
       - name: Install build tools
         run: >
           apt update && apt -y upgrade && apt -y dist-upgrade &&
           apt -y install git build-essential cmake gcc 
           linux-headers-${{ env.HEADERS_SUFFIX }}
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod
+      - name: Get kernel name from headers
+        run: >
+          echo KERNEL_NAME=`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.HEADERS_SUFFIX }}' | 
+          sed 's/linux-headers-//'` >> $GITHUB_ENV;
+          cat $GITHUB_ENV
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
@@ -129,7 +133,8 @@ jobs:
         working-directory: ./build
         run: >
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.HEADERS_SUFFIX }}'` 
+          -DKDIR=/usr/src/linux-headers-${{ env.KERNEL_NAME }}
+          -DMODULES_KDIR=/lib/modules/${{ env.KERNEL_NAME }}
           -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
           -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
@@ -155,6 +160,6 @@ jobs:
       - name: Upload .deb package as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: deb-package-${{ env.DISTRO }}-${{ env.UNAME_M }}
+          name: deb-package-${{ env.DISTRO }}-${{ env.UNAME_M }}-${{ env.KERNEL_NAME }}
           path: build/accel-ppp_*.deb
           if-no-files-found: error
