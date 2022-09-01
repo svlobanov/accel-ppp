@@ -72,7 +72,7 @@ jobs:
       - name: Upload .deb package as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: deb-package-${{ matrix.distro }}-${{ env.UNAME_R }}
+          name: deb-package-${{ env.UNAME_R }}-${{ matrix.distro }}
           path: build/accel-ppp_*.deb
           if-no-files-found: error
 
@@ -134,7 +134,7 @@ jobs:
         run: >
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
           -DKDIR=/usr/src/linux-headers-${{ env.KERNEL_NAME }}
-          -DMODULES_KDIR=/lib/modules/${{ env.KERNEL_NAME }}
+          -DMODULES_KDIR=${{ env.KERNEL_NAME }}
           -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
           -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
