@@ -21,7 +21,7 @@ jobs:
         run: >
           sudo apt update && 
           sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` 
-          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip sudo iproute2 timelimit
+          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip iproute2 timelimit
 
       - name: Install testing tools (using pip)
         run: >
@@ -46,9 +46,12 @@ jobs:
       - name: make && make install
         working-directory: ./build
         run: make && sudo make install
+      
+      - name: Set suid bit for accel-pppd
+        run: chmod +s /usr/sbin/accel-pppd
 
       - name: Run tests (for coverage report)
-        run: timelimit -t 15 -T 20 sudo python3 -m pytest -Wall tests -v || exit 0
+        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v || exit 0
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |
@@ -65,6 +68,7 @@ jobs:
         run: cat tests/report/accel-ppp.txt
 
       - name: Upload coverage report
+        if: ${{ false }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-on-${{ matrix.distro }}
