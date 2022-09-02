@@ -4,7 +4,7 @@ from common import accel_pppd_process, config
 
 def pytest_addoption(parser):
     parser.addoption("--accel_cmd", action="store", default="accel-cmd")
-    parser.addoption("--accel_pppd", action="store", default="/usr/sbin/accel-pppd")
+    parser.addoption("--accel_pppd", action="store", default="accel-pppd")
     parser.addoption("--accel_pppd_max_wait_time", action="store", default=5.0)
 
 
