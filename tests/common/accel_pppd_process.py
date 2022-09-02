@@ -43,6 +43,7 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
 def end(accel_pppd_thread, accel_pppd_control):
     print("accel_pppd_end: begin")
     if "process" in accel_pppd_control:
+        print("accel_pppd_end: process: " + str(accel_pppd_control["process"]))
         accel_pppd_control["process"].kill()
     accel_pppd_thread.join()
     print("accel_pppd_end: finished")

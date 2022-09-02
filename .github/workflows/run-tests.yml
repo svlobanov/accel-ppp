@@ -25,7 +25,7 @@ jobs:
 
       - name: Install testing tools (using pip)
         run: >
-          pip3 install pytest gcovr pytest-timeout
+          sudo pip3 install pytest gcovr pytest-timeout
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -46,12 +46,13 @@ jobs:
       - name: make && make install
         working-directory: ./build
         run: make && sudo make install
-      
+
       - name: Set suid bit for accel-pppd
+        if: ${{ false }}
         run: sudo chmod +s /usr/sbin/accel-pppd
 
       - name: Run tests (for coverage report)
-        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v || exit 0
+        run: timelimit -t 15 -T 20 sudo python3 -m pytest -Wall tests -v || exit 0
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |
@@ -62,10 +63,13 @@ jobs:
           pwd
           ls -la
           find . | grep gcda
-          find / | grep gcda
-      
+          find . | grep gcno
+
       - name: Show standard report
         run: cat tests/report/accel-ppp.txt
+
+      - name: ps uax | grep accel-ppp
+        run: ps uax | grep accel-ppp
 
       - name: Upload coverage report
         if: ${{ false }}
