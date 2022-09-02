@@ -13,6 +13,7 @@ def accel_pppd_config():
 
 
 # test accel-cmd command with started accel-pppd
+@pytest.mark.timeout(5)
 def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
 
     # test that accel-pppd started successfully

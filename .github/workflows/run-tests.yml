@@ -21,11 +21,11 @@ jobs:
         run: >
           sudo apt update && 
           sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` 
-          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip sudo iproute2
+          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip sudo iproute2 timelimit
 
       - name: Install testing tools (using pip)
         run: >
-          pip3 install pytest gcovr
+          pip3 install pytest gcovr pytest-timeout
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
         run: make && sudo make install
 
       - name: Run tests
-        run: python3 -m pytest -Wall tests -v
+        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v
 
       - name: (re)mkdir build
         run: rm -rf build && mkdir build
@@ -65,7 +65,7 @@ jobs:
         run: make && sudo make install
 
       - name: Run tests (for coverage report)
-        run: python3 -m pytest -Wall tests -v
+        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |

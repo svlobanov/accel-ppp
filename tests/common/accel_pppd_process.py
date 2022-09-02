@@ -5,7 +5,7 @@ import time
 
 
 def accel_pppd_thread_func(accel_pppd, args, accel_pppd_control):
-    process=Popen(["sudo", accel_pppd] + args, stdout=PIPE, stderr=PIPE)
+    process = Popen(["sudo", accel_pppd] + args, stdout=PIPE, stderr=PIPE)
     print(process)
     accel_pppd_control["process"] = process
     print("accel_pppd_thread_func: before communicate")
@@ -27,10 +27,11 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
     # accel-pppd needs some time to be accessible
     sleep_time = 0.0
     is_started = False
-    while sleep_time < max_wait_time:
+    # while sleep_time < max_wait_time:
+    while 1 < 2:
         (exit, out, err) = process.run([accel_cmd, "show version"])
-        if exit != 0:
-            time.sleep(0.01)
+        if exit != 1: #0
+            time.sleep(1.01) # 0.01
             sleep_time += 0.01
         else:
             is_started = True
