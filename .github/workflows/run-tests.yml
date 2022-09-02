@@ -1,0 +1,82 @@
+name: Run tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  Build-and-Run-Tests:
+    #if: ${{ false }} # disable for now
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["ubuntu-22.04", "ubuntu-20.04"]
+
+    runs-on: ${{ matrix.distro }}
+    steps:
+      - name: Install build tools (using apt)
+        run: >
+          sudo apt update && 
+          sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` 
+          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip sudo iproute2
+
+      - name: Install testing tools (using pip)
+        run: >
+          pip3 install pytest gcovr
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: mkdir build
+        run: mkdir build
+
+      - name: cmake (without coverage)
+        working-directory: ./build
+        run: >
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-`uname -r` 
+          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE ..
+
+      - name: make && make install
+        working-directory: ./build
+        run: make && make install
+
+      - name: Run tests
+        run: python3 -m pytest -Wall tests -v
+
+      - name: (re)mkdir build
+        run: rm -rf build && mkdir build
+
+      - name: cmake (with coverage)
+        working-directory: ./build
+        run: >
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-`uname -r` 
+          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
+          -DCMAKE_C_FLAGS="--coverage -O0" ..
+
+      - name: make && make install
+        working-directory: ./build
+        run: make && make install
+
+      - name: Run tests (for coverage report)
+        run: python3 -m pytest -Wall tests -v
+
+      - name: Generate coverage reports (default(txt), csv, html)
+        run: |
+          gcovr --config=tests/gcovr.conf --output=tests/report/accel-ppp.txt
+          gcovr --config=tests/gcovr.conf --csv --output=tests/report/accel-ppp.csv
+          gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html
+      
+      - name: Show standard report
+        run: cat tests/report/accel-ppp.txt
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-on-${{ matrix.distro }}
+          path: tests/report/
+          if-no-files-found: error
