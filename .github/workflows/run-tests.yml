@@ -35,23 +35,6 @@ jobs:
       - name: mkdir build
         run: mkdir build
 
-      - name: cmake (without coverage)
-        working-directory: ./build
-        run: >
-          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/linux-headers-`uname -r` 
-          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE ..
-
-      - name: make && make install
-        working-directory: ./build
-        run: make && sudo make install
-
-      - name: Run tests
-        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v || exit 0
-
-      - name: (re)mkdir build
-        run: rm -rf build && mkdir build
-
       - name: cmake (with coverage)
         working-directory: ./build
         run: >
@@ -75,6 +58,7 @@ jobs:
           gcovr --version
           pwd
           ls -la
+          find . | grep gcda
       
       - name: Show standard report
         run: cat tests/report/accel-ppp.txt

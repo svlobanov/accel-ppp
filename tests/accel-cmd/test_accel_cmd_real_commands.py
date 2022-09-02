@@ -24,7 +24,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
     # test that 'show stat' has no errors and contains 'uptime'
     assert (
         exit_sh_stat == 1
-        and len(out_sh_stat) > 0
+        and len(out_sh_stat) < 0
         and err_sh_stat == ""
         and "uptime" in out_sh_stat
     )
