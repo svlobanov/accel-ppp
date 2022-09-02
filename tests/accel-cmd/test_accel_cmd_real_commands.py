@@ -23,7 +23,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
 
     # test that 'show stat' has no errors and contains 'uptime'
     assert (
-        exit_sh_stat == 0
+        exit_sh_stat == 1
         and len(out_sh_stat) > 0
         and err_sh_stat == ""
         and "uptime" in out_sh_stat
@@ -34,7 +34,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
     )
     # test that 'show sessions' has no errors and contains 'sid'
     assert (
-        exit_sh_ses == 0
+        exit_sh_ses == 1
         and len(out_sh_ses) > 0
         and err_sh_ses == ""
         and "sid" in out_sh_ses
@@ -43,7 +43,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
     (exit_help, out_help, err_help) = process.run([accel_cmd, "help"])
     # test that 'help' has no errors and contains 'show stat'
     assert (
-        exit_help == 0
+        exit_help == 1
         and len(out_help) > 0
         and err_help == ""
         and "show stat" in out_help
