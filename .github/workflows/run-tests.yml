@@ -29,6 +29,8 @@ jobs:
 
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: mkdir build
         run: mkdir build
@@ -56,7 +58,6 @@ jobs:
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
           -DKDIR=/usr/src/linux-headers-`uname -r` 
           -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
-          -DCPACK_TYPE=Ubuntu20
           -DCMAKE_C_FLAGS="--coverage -O0" ..
 
       - name: make && make install
