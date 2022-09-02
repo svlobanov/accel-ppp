@@ -48,7 +48,7 @@ jobs:
         run: make && sudo make install
 
       - name: Run tests (for coverage report)
-        run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v || exit 0
+        run: timelimit -t 15 -T 20 sudo python3 -m pytest -Wall tests -v || exit 0
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |
@@ -59,6 +59,7 @@ jobs:
           pwd
           ls -la
           find . | grep gcda
+          find / | grep gcda
       
       - name: Show standard report
         run: cat tests/report/accel-ppp.txt
