@@ -24,12 +24,3 @@ def test_accel_cmd_mcast_host(accel_cmd):
     # test that accel-cmd (tried to connecto to mcast host) exits with code != 0,
     # prints nothing to stdout and prints an error to stderr
     assert exit != 0 and out == "" and err != ""
-
-
-@pytest.mark.timeout(5)
-def test_accel_cmd_mcast_host():
-    (exit, out, err) = process.run(["sudo", "cat", "/etc/passwd"])
-
-    print("out=" + out)
-    print("err=" + err)
-    assert 1 == 2

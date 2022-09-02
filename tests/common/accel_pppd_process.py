@@ -5,7 +5,7 @@ import time
 
 
 def accel_pppd_thread_func(accel_pppd, args, accel_pppd_control):
-    process = Popen(["sudo", accel_pppd] + args, stdout=PIPE, stderr=PIPE)
+    process = Popen([accel_pppd] + args, stdout=PIPE, stderr=PIPE)
     print(process)
     accel_pppd_control["process"] = process
     print("accel_pppd_thread_func: before communicate")
