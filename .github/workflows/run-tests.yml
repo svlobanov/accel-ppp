@@ -48,7 +48,7 @@ jobs:
         run: make && sudo make install
       
       - name: Set suid bit for accel-pppd
-        run: chmod +s /usr/sbin/accel-pppd
+        run: sudo chmod +s /usr/sbin/accel-pppd
 
       - name: Run tests (for coverage report)
         run: timelimit -t 15 -T 20 python3 -m pytest -Wall tests -v || exit 0
