@@ -5,7 +5,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - tests
 
 jobs:
   Build-and-Run-Tests:
