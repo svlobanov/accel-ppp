@@ -44,7 +44,7 @@ jobs:
 
       - name: make && make install
         working-directory: ./build
-        run: make && make install
+        run: make && sudo make install
 
       - name: Run tests
         run: python3 -m pytest -Wall tests -v
@@ -62,7 +62,7 @@ jobs:
 
       - name: make && make install
         working-directory: ./build
-        run: make && make install
+        run: make && sudo make install
 
       - name: Run tests (for coverage report)
         run: python3 -m pytest -Wall tests -v
