@@ -8,8 +8,27 @@ on:
       - tests
 
 jobs:
-  Build-and-Run-Tests:
+  Collect-Info:
     #if: ${{ false }} # disable for now
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["ubuntu-22.04", "ubuntu-20.04"]
+
+    runs-on: ${{ matrix.distro }}
+    steps:
+      - name: collect b
+        run: |
+          dpkg --list
+          dpkg -S pppoe-discovery
+          pppoe-discovery --help
+          apt -y install ppp pppoe
+          dpkg --list
+          dpkg -S pppoe-discovery
+          pppoe-discovery --help
+
+  Build-and-Run-Tests:
+    if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
