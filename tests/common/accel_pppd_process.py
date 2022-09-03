@@ -5,8 +5,6 @@ import time
 
 
 def accel_pppd_thread_func(accel_pppd_control):
-    # process = Popen([accel_pppd] + args, stdout=PIPE, stderr=PIPE)
-    # print(process)
     process = accel_pppd_control["process"]
     print("accel_pppd_thread_func: before communicate")
     (out, err) = process.communicate()
@@ -41,8 +39,8 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
             break
         (exit, out, err) = process.run([accel_cmd, "show version"])
         if exit != 0:  # does not reply
-            time.sleep(0.01)
-            sleep_time += 0.01
+            time.sleep(0.1)
+            sleep_time += 0.1
         else:  # replied
             print("accel_pppd_start: 'show version' replied")
             is_started = True

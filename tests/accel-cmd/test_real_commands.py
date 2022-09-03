@@ -7,6 +7,10 @@ def accel_pppd_config():
     return """
     [modules]
 
+    [log]
+    log-debug=/dev/stdout
+    level=5
+
     [cli]
     tcp=127.0.0.1:2001
     """

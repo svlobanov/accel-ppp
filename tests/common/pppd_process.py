@@ -1,6 +1,5 @@
 from subprocess import Popen, PIPE
 from threading import Thread
-import time
 
 
 def pppd_thread_func(pppd_control):

@@ -21,8 +21,8 @@ jobs:
         run: >
           sudo apt update && 
           sudo apt -y install git build-essential cmake gcc linux-headers-`uname -r` 
-          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip iproute2
-          ppp pppoe
+          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip 
+          iproute2 ppp pppoe isc-dhcp-client
 
       - name: Install testing tools (using pip)
         run: >

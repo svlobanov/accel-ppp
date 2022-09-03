@@ -10,15 +10,8 @@ def accel_pppd_config(veth_pair_netns):
         """
     [modules]
     pppoe
-    auth_pap
+    ipoe
     ippool
-
-    [log]
-    log-debug=/dev/stdout
-    level=5
-
-    [auth]
-    any-login=1
 
     [ip-pool]
     gw-ip-address=192.0.2.1
@@ -27,39 +20,24 @@ def accel_pppd_config(veth_pair_netns):
     [cli]
     tcp=127.0.0.1:2001
 
-    [pppoe]
+    [log]
+    log-debug=/dev/stdout
+    level=5
+
+    [ipoe]
+    noauth=1
+    shared=1
+    gw-ip-address=192.0.2.1/24
     interface="""
         + veth_pair_netns["veth_a"]
     )
 
 
-@pytest.fixture()
-def pppd_config(veth_pair_netns):
-    print("pppd_config veth_pair_netns: " + str(veth_pair_netns))
-    return (
-        """
-    nodetach
-    noipdefault
-    defaultroute
-    connect /bin/true
-    noauth
-    persist
-    mtu 1492
-    noaccomp
-    default-asyncmap
-    plugin rp-pppoe.so
-    user loginAB
-    password pass123
-    nic-"""
-        + veth_pair_netns["veth_b"]
-    )
+# test dhcpv4 shared session without auth check
+def test_ipoe_shared_session_wo_auth(dhclient_instance, accel_cmd, veth_pair_netns):
 
-
-# test pppoe session without auth check
-def test_pppoe_session_wo_auth(pppd_instance, accel_cmd):
-
-    # test that pppd (with accel-pppd) started successfully
-    assert pppd_instance["is_started"]
+    # test that dhclient (with accel-pppd) started successfully
+    assert dhclient_instance["is_started"]
 
     # wait until session is started
     max_wait_time = 10.0
@@ -69,12 +47,12 @@ def test_pppoe_session_wo_auth(pppd_instance, accel_cmd):
         (exit, out, err) = process.run(
             [
                 accel_cmd,
-                "show sessions match username loginAB username,ip,state",
+                "show sessions called-sid,ip,state",
             ]
         )
         assert exit == 0  # accel-cmd fails
         # print(out)
-        if "loginAB" in out and "192.0.2." in out and "active" in out:
+        if veth_pair_netns["veth_a"] in out and "192.0.2." in out and "active" in out:
             # session is found
             print(
                 "test_pppoe_session_wo_auth: session found in (sec): " + str(sleep_time)
@@ -84,7 +62,7 @@ def test_pppoe_session_wo_auth(pppd_instance, accel_cmd):
         time.sleep(0.1)
         sleep_time += 0.1
 
-    print("test_pppoe_session_wo_auth: last accel-cmd out: " + out)
+    print("test_ipoe_shared_session_wo_auth: last accel-cmd out: " + out)
 
     # test that session is started
     assert is_started == True
