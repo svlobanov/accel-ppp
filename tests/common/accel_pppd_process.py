@@ -9,13 +9,16 @@ def accel_pppd_thread_func(accel_pppd_control):
     # print(process)
     process = accel_pppd_control["process"]
     print("accel_pppd_thread_func: before communicate")
-    process.communicate()
-    print("accel_pppd_thread_func: after communicate")
+    (out, err) = process.communicate()
+    print(
+        "accel_pppd_thread_func: after communicate out=" + str(out) + " err=" + str(err)
+    )
     process.wait()
     print("accel_pppd_thread_func: after wait")
 
 
 def start(accel_pppd, args, accel_cmd, max_wait_time):
+    print("accel_pppd_start: begin")
     accel_pppd_process = Popen([accel_pppd] + args, stdout=PIPE, stderr=PIPE)
     accel_pppd_control = {"process": accel_pppd_process}
     accel_pppd_thread = Thread(
@@ -29,11 +32,19 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
     sleep_time = 0.0
     is_started = False
     while sleep_time < max_wait_time:
+        if accel_pppd_process.poll() is not None:  # process is terminated
+            print(
+                "accel_pppd_start: terminated during 'show version' polling in (sec): "
+                + str(sleep_time)
+            )
+            is_started = False
+            break
         (exit, out, err) = process.run([accel_cmd, "show version"])
         if exit != 0:  # does not reply
             time.sleep(0.01)
             sleep_time += 0.01
         else:  # replied
+            print("accel_pppd_start: 'show version' replied")
             is_started = True
             break
 
@@ -42,15 +53,17 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
 
 def end(accel_pppd_thread, accel_pppd_control, accel_cmd, max_wait_time):
     print("accel_pppd_end: begin")
+    if accel_pppd_control["process"].poll() is not None: # terminated
+        print("accel_pppd_end: already terminated. nothing to do")
+        accel_pppd_thread.join() 
+        return
+
     process.run(
         [accel_cmd, "shutdown hard"]
     )  # send shutdown hard command (in coverage mode it helps saving coverage data)
     print("accel_pppd_end: after shutdown hard")
-    # if "process" not in accel_pppd_control:
-    #    print("accel_pppd_end: proccess not in accel_pppd_control. nothing to do")
-    #    accel_pppd_thread.join()  # wait until thread is finished
-    #    return
 
+    # wait until accel-pppd is finished
     sleep_time = 0.0
     is_finished = False
     while sleep_time < max_wait_time:
@@ -66,6 +79,7 @@ def end(accel_pppd_thread, accel_pppd_control, accel_cmd, max_wait_time):
             )
             break
 
+    # accel-pppd is still alive. kill it
     if not is_finished:
         print("accel_pppd_end: kill process: " + str(accel_pppd_control["process"]))
         accel_pppd_control["process"].kill()  # kill -9 if 'shutdown hard' didn't help

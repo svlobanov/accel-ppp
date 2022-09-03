@@ -40,7 +40,7 @@ jobs:
         run: >
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
           -DKDIR=/usr/src/linux-headers-`uname -r` 
-          -DLUA=TRUE -DSHAPER=FALSE -DRADIUS=TRUE 
+          -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE 
           -DCMAKE_C_FLAGS="--coverage -O0" ..
 
       - name: make && make install
