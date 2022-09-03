@@ -20,8 +20,6 @@ jobs:
       - name: collect b
         run: |
           dpkg --list
-          dpkg -S pppoe-discovery
-          pppoe-discovery --help
           apt -y install ppp pppoe
           dpkg --list
           dpkg -S pppoe-discovery
