@@ -8,7 +8,6 @@ on:
       - tests
 
 jobs:
-  Collect-Info:
 
   Build-and-Run-Tests:
     #if: ${{ false }} # disable for now
