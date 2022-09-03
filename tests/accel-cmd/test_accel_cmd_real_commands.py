@@ -13,7 +13,6 @@ def accel_pppd_config():
 
 
 # test accel-cmd command with started accel-pppd
-@pytest.mark.timeout(5)
 def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
 
     # test that accel-pppd started successfully
@@ -24,7 +23,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
     # test that 'show stat' has no errors and contains 'uptime'
     assert (
         exit_sh_stat == 0
-        and len(out_sh_stat) < 0
+        and len(out_sh_stat) > 0
         and err_sh_stat == ""
         and "uptime" in out_sh_stat
     )
@@ -44,7 +43,7 @@ def test_accel_cmd_commands(accel_pppd_instance, accel_cmd):
     # test that 'help' has no errors and contains 'show stat'
     assert (
         exit_help == 0
-        and len(out_help) < 0
+        and len(out_help) > 0
         and err_help == ""
         and "show stat" in out_help
     )
