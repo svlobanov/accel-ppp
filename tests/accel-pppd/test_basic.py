@@ -66,7 +66,7 @@ def accel_pppd_config():
     """
 
 
-# load all modules
+# load all modules and check that accel-pppd replies to 'show stat' command
 def test_load_all_modules(accel_pppd_instance, accel_cmd):
 
     # test that accel-pppd started successfully

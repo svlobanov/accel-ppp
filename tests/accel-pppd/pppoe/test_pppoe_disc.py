@@ -1,5 +1,5 @@
 import pytest
-from common import process, netns
+from common import netns
 
 
 @pytest.fixture()
@@ -22,7 +22,7 @@ def accel_pppd_config(veth_pair_netns):
     )
 
 
-# load all modules
+# test pppoe discovery
 def test_pppoe_discovery(accel_pppd_instance, veth_pair_netns):
 
     # test that accel-pppd started successfully
@@ -33,7 +33,7 @@ def test_pppoe_discovery(accel_pppd_instance, veth_pair_netns):
         veth_pair_netns["netns"], ["pppoe-discovery", "-I", veth_pair_netns["veth_b"]]
     )
 
-    # test that ac-name=test-accel is in pppoe-discovery reply
+    # test that ac-name=test-accel is in pppoe-discovery reply (PADO)
     assert (
         exit_sh_stat == 0
         and len(out_sh_stat) > 1
