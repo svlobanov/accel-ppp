@@ -21,6 +21,20 @@ sudo apt install iproute2 pppoe
 Then build accel-ppp in 'build' directory (as usual)
 
 Install accel-pppd (make install or use distro package). Do not run accel-pppd using systemd or other supervisors
+```bash
+mkdir build && cd build
+cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr  -DKDIR=/usr/src/linux-headers-`uname -r`  -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE -DCPACK_TYPE=Ubuntu20 ..
+make
+sudo make install # or 
+# cpack -G DEB && dpkg -i accel-ppp.deb
+```
+
+If you prefer make install, then it is required to insert kernel modules:
+```bash
+# form root dir
+sudo insmod build/drivers/vlan_mon/driver/vlan_mon.ko
+sudo insmod build/drivers/ipoe/driver/ipoe.ko
+```
 
 
 ## Run tests (without coverage)
@@ -48,22 +62,23 @@ sudo pip3 install gcovr
 
 ```bash
 # from root dir
-mkdir build
-cd build
-cmake -DCMAKE_C_FLAGS="--coverage -O0" ..
+rm -rf build && mkdir build && cd build
+cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr  -DKDIR=/usr/src/linux-headers-`uname -r`  -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE -DCPACK_TYPE=Ubuntu20 -DCMAKE_C_FLAGS="--coverage -O0" ..
 make
-sudo make install
+sudo make install # or 
+# cpack -G DEB && dpkg -i accel-ppp.deb
 ```
-(Add all other cmake options you need)
+
+Then insert kernel modules (ipoe.ko and vlan-mon.ko)
 
 ## Run tests and generate coverage report
 
 ```bash
 # from root dir (parent for this dir)
-sudo python3 -m pytest -Wall tests -v
-sudo gcovr --config=tests/gcovr.conf # default report
-sudo gcovr --config=tests/gcovr.conf --csv # csv report
-sudo gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html # html reports (most useful)
+sudo python3 -m pytest -Wall tests -v # execute tests to collect coverage data
+gcovr --config=tests/gcovr.conf # default report
+gcovr --config=tests/gcovr.conf --csv # csv report
+gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html # html reports (most useful)
 ```
 
 (If `gcovr` command does not exist, use `python3 -m gcovr` instead)

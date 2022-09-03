@@ -48,9 +48,13 @@ jobs:
         working-directory: ./build
         run: make && sudo make install
 
-      - name: Set suid bit for accel-pppd
-        if: ${{ false }}
-        run: sudo chmod +s /usr/sbin/accel-pppd
+      - name: Insert and check kernel modules (ipoe and vlan-mon)
+        # if: ${{ false }}
+        run: |
+          sudo insmod build/drivers/vlan_mon/driver/vlan_mon.ko
+          sudo insmod build/drivers/ipoe/driver/ipoe.ko
+          lsmod | grep ipoe
+          lsmod | grep vlan_mon
 
       - name: Run tests (for coverage report)
         run: sudo python3 -m pytest -Wall tests -v || exit 0
@@ -60,17 +64,12 @@ jobs:
           gcovr --config=tests/gcovr.conf --output=tests/report/accel-ppp.txt
           gcovr --config=tests/gcovr.conf --csv --output=tests/report/accel-ppp.csv
           gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html
-          gcovr --version
-          pwd
-          ls -la
-          find . | grep gcda
-          find . | grep gcno
 
-      - name: Show standard report
+      - name: Show default coverage report
         run: cat tests/report/accel-ppp.txt
 
       - name: Upload coverage report
-        #if: ${{ false }}
+        if: ${{ false }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-on-${{ matrix.distro }}
