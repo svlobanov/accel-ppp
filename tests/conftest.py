@@ -1,5 +1,5 @@
 import pytest
-from common import accel_pppd_process, config
+from common import accel_pppd_process, config, veth
 
 
 def pytest_addoption(parser):
@@ -65,3 +65,14 @@ def accel_pppd_instance(accel_pppd, accel_pppd_config_file, accel_cmd, pytestcon
         accel_cmd,
         pytestconfig.getoption("accel_pppd_max_finish_time"),
     )
+
+@pytest.fixture()
+def veth_pair_netns():
+    # test setup:
+    veth_pair_netns_instance = veth.create_veth_pair_netns()
+
+    # test execution:
+    yield veth_pair_netns_instance
+
+    # test teardown:
+    veth.delete_veth_pair_netns(veth_pair_netns_instance)
