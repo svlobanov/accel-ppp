@@ -87,7 +87,7 @@ jobs:
         run: cat tests/report/accel-ppp.txt
 
       - name: Upload coverage report
-        if: ${{ false }}
+        # if: ${{ false }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-on-${{ matrix.distro }}

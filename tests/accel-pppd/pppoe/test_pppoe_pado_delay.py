@@ -24,7 +24,8 @@ def accel_pppd_config(veth_pair_netns):
         + veth_pair_netns["veth_a"]
     )
 
-
+# This test requires pppoe-discovery with -a and -t options
+# Ubuntu 20.04 has not this option, Ubuntu 22.04 is ok
 # test pado delay. accel-pppd is configured for 1.5s delay
 # first step: test that pppoe-discovery fails if wait timeout=1<1.5
 # second step: test that pppoe-discovery gets pado if wait timeout=2>1.5
