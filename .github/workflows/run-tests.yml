@@ -61,6 +61,7 @@ jobs:
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |
+          mkdir -p tests/report
           gcovr --config=tests/gcovr.conf --output=tests/report/accel-ppp.txt
           gcovr --config=tests/gcovr.conf --csv --output=tests/report/accel-ppp.csv
           gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html

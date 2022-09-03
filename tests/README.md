@@ -76,6 +76,7 @@ Then insert kernel modules (ipoe.ko and vlan-mon.ko)
 ```bash
 # from root dir (parent for this dir)
 sudo python3 -m pytest -Wall tests -v # execute tests to collect coverage data
+mkdir tests/report
 gcovr --config=tests/gcovr.conf # default report
 gcovr --config=tests/gcovr.conf --csv # csv report
 gcovr --config=tests/gcovr.conf --html --html-details --output=tests/report/accel-ppp.html # html reports (most useful)

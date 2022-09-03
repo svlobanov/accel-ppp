@@ -24,6 +24,6 @@ def exec(netns_name, command):
     else:
         exit, out, err = process.run(["ip", "netns", "exec", netns_name] + command)
 
-    #print("netns.exec: exit=%d out=%s err=%s" % (exit, out, err))
+    print("netns.exec: commad=%s :: exit=%d out=%s err=%s" % (str(command), exit, out, err))
 
     return (exit, out, err)
