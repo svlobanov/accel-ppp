@@ -68,11 +68,8 @@ jobs:
       - name: Show standard report
         run: cat tests/report/accel-ppp.txt
 
-      - name: ps uax | grep accel-ppp
-        run: ps uax | grep accel-ppp
-
       - name: Upload coverage report
-        if: ${{ false }}
+        #if: ${{ false }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-on-${{ matrix.distro }}

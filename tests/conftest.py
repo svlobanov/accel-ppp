@@ -42,15 +42,18 @@ def accel_pppd_config_file(accel_pppd_config):
 @pytest.fixture()
 def accel_pppd_instance(accel_pppd, accel_pppd_config_file, accel_cmd, pytestconfig):
     # test setup:
+    max_wait_time = pytestconfig.getoption("accel_pppd_max_wait_time")
     is_started, accel_pppd_thread, accel_pppd_control = accel_pppd_process.start(
         accel_pppd,
         ["-c" + accel_pppd_config_file],
         accel_cmd,
-        pytestconfig.getoption("accel_pppd_max_wait_time"),
+        max_wait_time,
     )
 
     # test execution:
     yield is_started
 
     # test teardown:
-    accel_pppd_process.end(accel_pppd_thread, accel_pppd_control)
+    accel_pppd_process.end(
+        accel_pppd_thread, accel_pppd_control, accel_cmd, max_wait_time
+    )

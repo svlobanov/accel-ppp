@@ -1,7 +1,7 @@
 from common import process
 
 
-def test_accel_cmd_version(accel_pppd):
+def test_accel_pppd_version(accel_pppd):
     (exit, out, err) = process.run([accel_pppd, "--version"])
 
     # test that accel-pppd --version exits with code 0, prints

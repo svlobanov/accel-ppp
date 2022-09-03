@@ -28,22 +28,43 @@ def start(accel_pppd, args, accel_cmd, max_wait_time):
     sleep_time = 0.0
     is_started = False
     while sleep_time < max_wait_time:
-    #while 1 < 2:
         (exit, out, err) = process.run([accel_cmd, "show version"])
-        if exit != 0: #0
-            time.sleep(0.01) # 0.01
+        if exit != 0:  # does not reply
+            time.sleep(0.01)
             sleep_time += 0.01
-        else:
+        else:  # replied
             is_started = True
             break
 
     return (is_started, accel_pppd_thread, accel_pppd_control)
 
 
-def end(accel_pppd_thread, accel_pppd_control):
+def end(accel_pppd_thread, accel_pppd_control, accel_cmd, max_wait_time):
     print("accel_pppd_end: begin")
-    if "process" in accel_pppd_control:
-        print("accel_pppd_end: process: " + str(accel_pppd_control["process"]))
-        accel_pppd_control["process"].kill()
-    accel_pppd_thread.join()
+    process.run(
+        [accel_cmd, "shutdown hard"]
+    )  # send shutdown hard command (in coverage mode it helps saving coverage data)
+    print("accel_pppd_end: after shutdown hard")
+    if "process" not in accel_pppd_control:
+        print("accel_pppd_end: proccess not in accel_pppd_control. nothing to do")
+        accel_pppd_thread.join()  # wait until thread is finished
+        return
+
+    sleep_time = 0.0
+    is_finished = False
+    while sleep_time < max_wait_time:
+        if accel_pppd_control["process"].poll() is None:  # not terminated yet
+            time.sleep(0.01)
+            sleep_time += 0.01
+            #print("accel_pppd_end: sleep 0.01")
+        else:
+            is_finished = True
+            print("accel_pppd_end: finished via shutdown hard")
+            break
+
+    if not is_finished:
+        print("accel_pppd_end: kill process: " + str(accel_pppd_control["process"]))
+        accel_pppd_control["process"].kill() # kill -9 if 'shutdown hard' didn't help
+
+    accel_pppd_thread.join()  # wait until thread is finished
     print("accel_pppd_end: finished")
