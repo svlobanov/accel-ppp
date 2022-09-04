@@ -32,7 +32,7 @@ jobs:
           echo "    home: /dev/shm/user" >> init-data
           echo "    sudo: ALL=(ALL) NOPASSWD:ALL" >> init-data
           echo "    ssh_authorized_keys:" >> init-data
-          echo "      - "`cat ssh-key` >> init-data
+          echo "      - "`cat ssh-key.pub` >> init-data
           echo "power_state:">> init-data
           echo "    mode: poweroff">> init-data
           cat init-data
