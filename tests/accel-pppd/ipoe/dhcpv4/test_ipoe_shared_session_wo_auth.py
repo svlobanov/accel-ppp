@@ -34,6 +34,8 @@ def accel_pppd_config(veth_pair_netns):
 
 
 # test dhcpv4 shared session without auth check
+@pytest.mark.dependency(depends=["ipoe_driver_loaded"], scope = 'session')
+@pytest.mark.ipoe_driver
 def test_ipoe_shared_session_wo_auth(dhclient_instance, accel_cmd, veth_pair_netns):
 
     # test that dhclient (with accel-pppd) started successfully

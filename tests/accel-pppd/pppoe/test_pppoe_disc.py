@@ -37,7 +37,6 @@ def test_pppoe_discovery(accel_pppd_instance, veth_pair_netns):
     # test that ac-name=test-accel is in pppoe-discovery reply (PADO)
     assert (
         exit_sh_stat == 0
-        and len(out_sh_stat) > 1
         and err_sh_stat == ""
         and "test-accel" in out_sh_stat
     )

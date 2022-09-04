@@ -27,7 +27,7 @@ jobs:
 
       - name: Install testing tools (using pip)
         run: >
-          sudo pip3 install pytest gcovr
+          sudo pip3 install pytest pytest-dependency gcovr
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -57,8 +57,9 @@ jobs:
           lsmod | grep ipoe
           lsmod | grep vlan_mon
 
-      - name: Run tests (for coverage report)
-        run: sudo python3 -m pytest -Wall tests -v || exit 0
+      - name: Run tests (for coverage report) (fail is ok)
+        working-directory: ./tests
+        run: sudo python3 -m pytest -Wall -v || exit 0
 
       - name: Generate coverage reports (default(txt), csv, html)
         run: |

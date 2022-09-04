@@ -1,6 +1,5 @@
 import pytest
-from common import accel_pppd_process, config, veth, pppd_process, dhclient_process
-import tempfile, os
+from common import accel_pppd_process, config, veth
 
 
 def pytest_addoption(parser):
@@ -16,6 +15,17 @@ def pytest_addoption(parser):
     parser.addoption(
         "--accel_pppd_max_finish_time", action="store", default=10.0
     )  # fininsh timeout (before kill)
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "ipoe_driver: marks tests as related to ipoe kernel module (deselect with '-m \"not ipoe_driver\"')",
+    )
+    config.addinivalue_line(
+        "markers",
+        "vlan_mon_driver: marks tests as related to ipoe kernel module (deselect with '-m \"not vlan_mon_driver\"')",
+    )
 
 
 # accel-pppd executable file name
@@ -71,12 +81,16 @@ def accel_pppd_instance(accel_pppd, accel_pppd_config_file, accel_cmd, pytestcon
         pytestconfig.getoption("accel_pppd_max_finish_time"),
     )
 
+# defines vlans that will be created over veth pair (might be redefined by specific test)
+@pytest.fixture()
+def veth_pair_vlans_config():
+    return {"vlans_a": [], "vlans_b": []}
 
 # setup and teardown for netns and veth pair
 @pytest.fixture()
-def veth_pair_netns():
+def veth_pair_netns(veth_pair_vlans_config):
     # test setup:
-    veth_pair_netns_instance = veth.create_veth_pair_netns()
+    veth_pair_netns_instance = veth.create_veth_pair_netns(veth_pair_vlans_config)
 
     # test execution:
     yield veth_pair_netns_instance

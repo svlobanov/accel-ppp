@@ -1,4 +1,4 @@
-from common import process, netns
+from common import process, netns, vlan
 import time
 import math
 
@@ -29,19 +29,23 @@ def assign_netns(veth, netns):
 
 
 # up interface. if netns is None, then up in global rt. if ok returns 0
-def up_interface(veth, netns_name):
-    command = ["ip", "link", "set", veth, "up"]
-    veth, out, err = netns.exec(netns_name, command)
-    print("veth.up_interface: exit=%d out=%s err=%s" % (veth, out, err))
+def up_interface(iface, netns_name):
+    command = ["ip", "link", "set", iface, "up"]
+    exit, out, err = netns.exec(netns_name, command)
+    print(
+        "veth.up_interface: iface=%s netns=%s exit=%d out=%s err=%s"
+        % (iface, str(netns_name), exit, out, err)
+    )
 
-    return veth
+    return exit
 
 
 # creates netns, creates veth pair and place second link to netns
+# creates vlans over veth interfaces according to veth_pair_vlans_config
 # return dict with 'netns', 'veth_a', 'veth_b'
-def create_veth_pair_netns():
+def create_veth_pair_netns(veth_pair_vlans_config):
 
-    name = str(math.floor(time.time() * 1000))
+    name = str(math.floor(time.time() * 1000) % 1000000)
     netns_name = "N" + name
     netns_status = netns.create(netns_name)
     print("create_veth_pair_netns: netns_status=%d" % netns_status)
@@ -57,6 +61,16 @@ def create_veth_pair_netns():
     print("create_veth_pair_netns: assign_status=%d" % assign_status)
 
     up_interface(veth_b, netns_name)
+
+    vlans_a = veth_pair_vlans_config["vlans_a"]
+    for vlan_num in vlans_a:
+        vlan.create(veth_a, vlan_num, None)
+        up_interface(veth_a + "." + str(vlan_num), None)
+
+    vlans_b = veth_pair_vlans_config["vlans_b"]
+    for vlan_num in vlans_b:
+        vlan.create(veth_b, vlan_num, netns_name)
+        up_interface(veth_b + "." + str(vlan_num), netns_name)
 
     return {"netns": netns_name, "veth_a": veth_a, "veth_b": veth_b}
 

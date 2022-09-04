@@ -6,7 +6,9 @@ These tests are done for Ubuntu and Debian distros. Please use latest stable Deb
 
 Install pytest
 
-Using apt: `sudo apt install python3-pytest` or using pip: `sudo pip3 install pytest`
+Using apt: `sudo apt install python3-pytest python3-pytest-dependency` or using pip: `sudo pip3 install pytest pytest-dependency`. 
+
+pytest-dependency version must be >= 0.5 (with 'scope' support)
 
 ---
 Note: tests will be run under sudo. If you prefer install python modules using pip, then do it under sudo as described above.
@@ -41,7 +43,13 @@ sudo insmod build/drivers/ipoe/driver/ipoe.ko
 
 ```bash
 # from root dir (parent for this dir)
-sudo python3 -m pytest -Wall tests -v
+sudo python3 -m pytest -Wall -v tests
+```
+
+To skip tests related to ipoe and vlan_mon kernel modules:
+```bash
+# from root dir (parent for this dir)
+sudo python3 -m pytest -Wall -v -m "not ipoe_driver and not vlan_mon_driver" tests
 ```
 
 ## Preparations (for coverage report)
