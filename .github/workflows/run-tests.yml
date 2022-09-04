@@ -15,8 +15,8 @@ jobs:
         run: >
           sudo apt update && 
           sudo apt -y install qemu-system-x86 cloud-image-utils cpu-checker cloud-image-utils wget openssh-client
-      - name: Check kvm support
-        run: sudo kvm-ok
+      - name: Check kvm support (fail is ok)
+        run: sudo kvm-ok || exit 0
       - name: Prepare cloud-init image disk
         run: |
           ssh-keygen -t ed25519 -b 512 -q -N "" -f ssh-key
@@ -43,7 +43,7 @@ jobs:
           mkdir img
           tar -xf debian-11-generic-amd64.tar.xz -C img
       - name: Run target OS (for cloud-init actions)
-        run: sudo qemu-system-x86_64 -accel kvm -m 2048 -nographic -drive format=raw,file=img/`ls -1 img` -drive format=raw,file=init.img
+        run: sudo qemu-system-x86_64 -m 2048 -nographic -drive format=raw,file=img/`ls -1 img` -drive format=raw,file=init.img
 
   Build-and-Test:
     if: ${{ false }} # disable for now
