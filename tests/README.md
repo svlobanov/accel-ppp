@@ -16,7 +16,7 @@ Note: tests will be run under sudo. If you prefer install python modules using p
 ---
 
 Install additional tools required for tests:
-``` bash
+```bash
 sudo apt install iproute2 ppp pppoe isc-dhcp-client
 ```
 
@@ -42,13 +42,13 @@ sudo insmod build/drivers/ipoe/driver/ipoe.ko
 ## Run tests (without coverage)
 
 ```bash
-# from root dir (parent for this dir)
-sudo python3 -m pytest -Wall -v tests
+# from this dir (tests)
+sudo python3 -m pytest -Wall -v
 ```
 
 To skip tests related to ipoe and vlan_mon kernel modules:
 ```bash
-# from root dir (parent for this dir)
+# from this dir (tests)
 sudo python3 -m pytest -Wall -v -m "not ipoe_driver and not vlan_mon_driver" tests
 ```
 
