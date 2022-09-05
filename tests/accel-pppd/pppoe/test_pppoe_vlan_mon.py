@@ -35,6 +35,7 @@ def accel_pppd_config(veth_pair_netns):
 # test pppoe discovery in vlan created by vlan_mon
 @pytest.mark.dependency(depends=["vlan_mon_driver_loaded"], scope="session")
 @pytest.mark.vlan_mon_driver
+@pytest.mark.timeout(30)
 def test_pppoe_vlan_mon(accel_pppd_instance, veth_pair_netns):
 
     # test that accel-pppd started successfully
@@ -47,4 +48,3 @@ def test_pppoe_vlan_mon(accel_pppd_instance, veth_pair_netns):
 
     # test that ac-name=test-accel is in pppoe-discovery reply (PADO)
     assert exit_sh_stat == 0 and err_sh_stat == "" and "test-accel" in out_sh_stat
-    assert 1 == 2
