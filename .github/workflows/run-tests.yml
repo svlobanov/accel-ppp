@@ -11,9 +11,9 @@ jobs:
   Build-and-Test-Qemu:
     runs-on: ubuntu-latest
     steps:
-      - run: echo \`uname -a\`
-      - run: echo "echo \`uname -a\`"
-      - run: exit 1
+      #- run: echo \`uname -a\`
+      #- run: echo "echo \`uname -a\`"
+      #- run: exit 1
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
@@ -71,7 +71,7 @@ jobs:
       - name: Install build tools (on target OS)
         run: >
           ssh -i ssh-key -p2222 user@localhost "sudo apt -y install
-          git build-essential cmake gcc linux-headers-amd64 
+          git build-essential cmake gcc linux-headers-\`uname -r\` 
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip 
           iproute2 ppp pppoe isc-dhcp-client && 
           sudo pip3 install pytest pytest-dependency gcovr"
@@ -84,7 +84,7 @@ jobs:
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
           mkdir build && cd build &&
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/linux-headers-amd64
+          -DKDIR=/usr/src/linux-headers-\`uname -r\` 
           -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE .. &&
           make && sudo make install"
       - name: Insert kernel modules
