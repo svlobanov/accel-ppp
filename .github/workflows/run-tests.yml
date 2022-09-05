@@ -81,7 +81,7 @@ jobs:
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
           mkdir build && cd build &&
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
-          -DKDIR=/usr/src/linux-headers-`uname -r` 
+          -DKDIR=/usr/src/linux-headers-amd64 &&
           -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE .. &&
           make && sudo make install"
       - name: Insert kernel modules
