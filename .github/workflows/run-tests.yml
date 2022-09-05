@@ -8,7 +8,8 @@ on:
       - master
 
 jobs:
-  Build-and-Test-Qemu:
+  Test-in-Qemu:
+    #if: ${{ false }} # disable for now
     runs-on: ubuntu-latest
     name: Test in Qemu (${{ matrix.distro }})
     strategy:
@@ -29,13 +30,16 @@ jobs:
             image: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
             untar: false
             format: qcow2
-          #- distro: Debian12
-          #  image: https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-generic-amd64-daily.tar.xz
-          #  untar: true
 
-          #- distro: Debian11
-          #  image: https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
-          #  untar: true
+          - distro: Debian12
+            image: https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-generic-amd64-daily.tar.xz
+            untar: true
+            format: raw
+
+          - distro: Debian11
+            image: https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
+            untar: true
+            format: raw
 
           - distro: Debian10
             image: https://cloud.debian.org/images/cloud/buster/latest/debian-10-generic-amd64.tar.xz
@@ -114,7 +118,7 @@ jobs:
           ssh -i ssh-key -p2222 user@localhost "sudo apt -y install
           git build-essential cmake gcc linux-headers-\`uname -r\` 
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip 
-          iproute2 ppp pppoe isc-dhcp-client && 
+          iproute2 ppp pppoe isc-dhcp-client timelimit && 
           sudo pip3 install pytest pytest-dependency gcovr"
       - name: Copy source code to target OS
         run: |
@@ -129,20 +133,56 @@ jobs:
           -DKDIR=/usr/src/linux-headers-\`uname -r\` 
           -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE .. &&
           make && sudo make install"
-      - name: Insert kernel modules
+
+      - name: Run tests (not related to ipoe and vlan_mon drivers)
+        timeout-minutes: 5
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp/tests && 
+          sudo python3 -m pytest -Wall -v -m \"not ipoe_driver and not vlan_mon_driver\""
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "ps aux | grep accel- && 
+          sudo dmesg"
+
+      - name: Insert ipoe kernel module
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
+          sudo insmod build/drivers/ipoe/driver/ipoe.ko &&
+          lsmod | grep ipoe "
+
+      - name: Run tests (not related to vlan_mon drivers)
+        timeout-minutes: 5
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp/tests && 
+          sudo python3 -m pytest -Wall -v -m \"not vlan_mon_driver\""
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "ps aux | grep accel- && 
+          sudo dmesg"
+
+      - name: Insert vlan_mon kernel module
         run: >
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
           sudo insmod build/drivers/vlan_mon/driver/vlan_mon.ko &&
-          sudo insmod build/drivers/ipoe/driver/ipoe.ko &&
-          lsmod | grep ipoe &&
           lsmod | grep vlan_mon"
-      - name: Run tests
-        run: >
-          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
-          cd tests && sudo python3 -m pytest -Wall -v"
 
-  Build-and-Test:
-    if: ${{ false }} # disable for now
+      - name: Run tests (all)
+        timeout-minutes: 5
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp/tests && 
+          sudo python3 -m pytest -Wall -v"
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "ps aux | grep accel- && 
+          sudo dmesg"
+
+  Test-in-GH:
+    #if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
@@ -189,11 +229,12 @@ jobs:
           lsmod | grep vlan_mon
 
       - name: Run tests
+        timeout-minutes: 5
         working-directory: ./tests
         run: sudo python3 -m pytest -Wall -v
 
-  Build-and-Test-With-Coverage:
-    if: ${{ false }} # disable for now
+  Test-in-GH-Coverage:
+    #if: ${{ false }} # disable for now
     strategy:
       fail-fast: false
       matrix:
@@ -241,6 +282,7 @@ jobs:
           lsmod | grep vlan_mon
 
       - name: Run tests (for coverage report) (fail is ok)
+        timeout-minutes: 5
         working-directory: ./tests
         run: sudo python3 -m pytest -Wall -v || exit 0
 
