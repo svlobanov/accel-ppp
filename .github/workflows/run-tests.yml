@@ -96,9 +96,8 @@ jobs:
           lsmod | grep vlan_mon"
       - name: Run tests
         run: >
-          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp && cd build 
-          cd tests && 
-          sudo python3 -m pytest -Wall -v"
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
+          cd tests && sudo python3 -m pytest -Wall -v"
 
   Build-and-Test:
     if: ${{ false }} # disable for now
