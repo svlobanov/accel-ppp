@@ -13,7 +13,20 @@ jobs:
     steps:
       #- run: echo \`uname -a\`
       #- run: echo "echo \`uname -a\`"
-      #- run: exit 1
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: 'accel-ppp'
+      - run: ls -la
+      - run: ls -1 accel-ppp
+      - run: tar -Jcf accel-ppp.txz accel-ppp
+      - run: rm -rf accel-ppp
+      - run: ls -la
+      - run: tar -xf accel-ppp.txz
+      - run: ls -la
+      - run: ls -1 accel-ppp
+      - run: exit 1
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
