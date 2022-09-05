@@ -10,6 +10,20 @@ on:
 jobs:
   Build-and-Test-Qemu:
     runs-on: ubuntu-latest
+    name: Test in Qemu (${{ matrix.distro }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: Debian12
+            image: https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-generic-amd64-daily.tar.xz
+
+          - distro: Debian11
+            image: https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
+
+          - distro: Debian10
+            image: https://cloud.debian.org/images/cloud/buster/latest/debian-10-generic-amd64.tar.xz
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -43,9 +57,9 @@ jobs:
           cloud-localds init.img init-data init-meta
       - name: Download, unpack and resize target OS cloud image
         run: |
-          wget -nv https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
+          wget -nv ${{ matrix.image }}
           mkdir img
-          tar -xf debian-11-generic-amd64.tar.xz -C img
+          tar -xf *.tar.xz -C img
           qemu-img resize -f raw img/`ls -1 img` +2G
       - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -m 2048 -nographic -drive format=raw,file=img/`ls -1 img` -drive format=raw,file=init.img
@@ -79,9 +93,9 @@ jobs:
           sudo pip3 install pytest pytest-dependency gcovr"
       - name: Copy source code to target OS
         run: >
-          tar -Jcf accel-ppp.txz accel-ppp
-          scp -i ssh-key -P2222 accel-ppp.txz user@localhost:
-          ssh -i ssh-key -p2222 user@localhost "tar -xf accel-ppp.txz"
+          tar -zcf accel-ppp.tar.gz accel-ppp
+          scp -i ssh-key -P2222 accel-ppp.tar.gz user@localhost:
+          ssh -i ssh-key -p2222 user@localhost "tar -zxf accel-ppp.tar.gz"
       - name: Build accel-ppp
         run: >
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
