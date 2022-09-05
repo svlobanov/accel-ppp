@@ -24,12 +24,11 @@ jobs:
           echo "#cloud-config" > init-data
           echo "package_update: true" >> init-data
           echo "package_upgrade: true" >> init-data
-          echo "package_reboot_if_required: true" >> init-data
+          echo "package_reboot_if_required: false" >> init-data
           echo "users:" >> init-data
           echo "  - default" >> init-data
           echo "  - name: user" >> init-data
           echo "    shell: /bin/bash" >> init-data
-          echo "    home: /dev/shm/user" >> init-data
           echo "    sudo: ALL=(ALL) NOPASSWD:ALL" >> init-data
           echo "    ssh_authorized_keys:" >> init-data
           echo "      - "`cat ssh-key.pub` >> init-data
@@ -66,6 +65,37 @@ jobs:
           ssh -i ssh-key -p2222 user@localhost "pwd"
           ssh -i ssh-key -p2222 user@localhost "uname -a"
           ssh -i ssh-key -p2222 user@localhost "sudo cat /etc/passwd"
+      - name: Install build tools (on target OS)
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "sudo apt -y install
+          git build-essential cmake gcc linux-headers-`uname -r` 
+          libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip 
+          iproute2 ppp pppoe isc-dhcp-client && 
+          sudo pip3 install pytest pytest-dependency gcovr"
+      - name: Check out repository code
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "git clone 
+          https://github.com/svlobanov/accel-ppp"
+      - name: Build accel-ppp
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
+          mkdir build && cd build &&
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-`uname -r` 
+          -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE .. &&
+          make && sudo make install"
+      - name: Insert kernel modules
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
+          sudo insmod build/drivers/vlan_mon/driver/vlan_mon.ko &&
+          sudo insmod build/drivers/ipoe/driver/ipoe.ko &&
+          lsmod | grep ipoe &&
+          lsmod | grep vlan_mon"
+      - name: Run tests
+        run: >
+          ssh -i ssh-key -p2222 user@localhost "cd accel-ppp && cd build 
+          cd tests && 
+          sudo python3 -m pytest -Wall -v"
 
   Build-and-Test:
     if: ${{ false }} # disable for now
