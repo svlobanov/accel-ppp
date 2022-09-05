@@ -92,10 +92,10 @@ jobs:
           iproute2 ppp pppoe isc-dhcp-client && 
           sudo pip3 install pytest pytest-dependency gcovr"
       - name: Copy source code to target OS
-        run: >
-          tar -zcf accel-ppp.tar.gz accel-ppp
-          scp -i ssh-key -P2222 accel-ppp.tar.gz user@localhost:
-          ssh -i ssh-key -p2222 user@localhost "tar -zxf accel-ppp.tar.gz"
+        run: |
+          tar -Jcf accel-ppp.tar.xz accel-ppp
+          scp -i ssh-key -P2222 accel-ppp.tar.xz user@localhost:
+          ssh -i ssh-key -p2222 user@localhost "tar -xf accel-ppp.tar.xz"
       - name: Build accel-ppp
         run: >
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
