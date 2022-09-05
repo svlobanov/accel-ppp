@@ -11,6 +11,9 @@ jobs:
   Build-and-Test-Qemu:
     runs-on: ubuntu-latest
     steps:
+      - run: echo \`uname -a\`
+      - run: echo "echo \`uname -a\`"
+      - run: exit 1
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
@@ -19,7 +22,7 @@ jobs:
         run: sudo kvm-ok || exit 0
       - name: Prepare cloud-init image disk
         run: |
-          ssh-keygen -t ed25519 -b 512 -q -N "" -f ssh-key
+          ssh-keygen -t ed25519 -q -N "" -f ssh-key
           echo "instance-id: $(uuidgen || echo i-abcdefg)" > init-meta
           echo "#cloud-config" > init-data
           echo "package_update: true" >> init-data
