@@ -60,11 +60,12 @@ jobs:
           sleep 5;
           done;
           cat ~/.ssh/known_hosts
-      - name: Display free space and current dir, test sudo
+      - name: Display free space, current dir, kernel version and test sudo
         run: |
-          ssh -p2222 user@localhost "df -h"
-          ssh -p2222 user@localhost "pwd"
-          ssh -p2222 user@localhost "sudo cat /etc/passwd"
+          ssh -i ssh-key -p2222 user@localhost "df -h"
+          ssh -i ssh-key -p2222 user@localhost "pwd"
+          ssh -i ssh-key -p2222 user@localhost "uname -a"
+          ssh -i ssh-key -p2222 user@localhost "sudo cat /etc/passwd"
 
   Build-and-Test:
     if: ${{ false }} # disable for now
