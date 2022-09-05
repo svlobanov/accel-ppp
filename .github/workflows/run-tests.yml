@@ -14,7 +14,7 @@ jobs:
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
-          sudo apt -y install qemu-system-x86 cloud-image-utils cpu-checker cloud-image-utils wget openssh-client screen
+          sudo apt -y install qemu-system-x86 qemu-utils cloud-image-utils cpu-checker cloud-image-utils wget openssh-client screen
       - name: Check kvm support (fail is ok)
         run: sudo kvm-ok || exit 0
       - name: Prepare cloud-init image disk
@@ -37,11 +37,12 @@ jobs:
           echo "    mode: poweroff">> init-data
           cat init-data
           cloud-localds init.img init-data init-meta
-      - name: Download and unpack target OS cloud image
+      - name: Download, unpack and resize target OS cloud image
         run: |
           wget -nv https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
           mkdir img
           tar -xf debian-11-generic-amd64.tar.xz -C img
+          qemu-img resize -f raw img/`ls -1 img` +2G
       - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -m 2048 -nographic -drive format=raw,file=img/`ls -1 img` -drive format=raw,file=init.img
       - name: Run target OS
@@ -59,6 +60,11 @@ jobs:
           sleep 5;
           done;
           cat ~/.ssh/known_hosts
+      - name: Display free space and current dir, test sudo
+        run: |
+          ssh -p2222 user@localhost "df -h"
+          ssh -p2222 user@localhost "pwd"
+          ssh -p2222 user@localhost "sudo cat /etc/passwd"
 
   Build-and-Test:
     if: ${{ false }} # disable for now
