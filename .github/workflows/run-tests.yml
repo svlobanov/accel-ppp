@@ -11,22 +11,11 @@ jobs:
   Build-and-Test-Qemu:
     runs-on: ubuntu-latest
     steps:
-      #- run: echo \`uname -a\`
-      #- run: echo "echo \`uname -a\`"
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          path: 'accel-ppp'
-      - run: ls -la
-      - run: ls -1 accel-ppp
-      - run: tar -Jcf accel-ppp.txz accel-ppp
-      - run: rm -rf accel-ppp
-      - run: ls -la
-      - run: tar -xf accel-ppp.txz
-      - run: ls -la
-      - run: ls -1 accel-ppp
-      - run: exit 1
+          path: "accel-ppp"
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
@@ -88,10 +77,11 @@ jobs:
           libpcre3-dev libssl-dev liblua5.1-0-dev kmod python3-pip 
           iproute2 ppp pppoe isc-dhcp-client && 
           sudo pip3 install pytest pytest-dependency gcovr"
-      - name: Check out repository code
+      - name: Copy source code to target OS
         run: >
-          ssh -i ssh-key -p2222 user@localhost "git clone 
-          https://github.com/svlobanov/accel-ppp"
+          tar -Jcf accel-ppp.txz accel-ppp
+          scp -i ssh-key -P2222 accel-ppp.txz user@localhost:
+          ssh -i ssh-key -p2222 user@localhost "tar -xf accel-ppp.txz"
       - name: Build accel-ppp
         run: >
           ssh -i ssh-key -p2222 user@localhost "cd accel-ppp &&
