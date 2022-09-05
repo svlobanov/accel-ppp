@@ -14,7 +14,7 @@ jobs:
       - name: Install qemu and required tools
         run: >
           sudo apt update && 
-          sudo apt -y install qemu-system-x86 cloud-image-utils cpu-checker cloud-image-utils wget openssh-client
+          sudo apt -y install qemu-system-x86 cloud-image-utils cpu-checker cloud-image-utils wget openssh-client screen
       - name: Check kvm support (fail is ok)
         run: sudo kvm-ok || exit 0
       - name: Prepare cloud-init image disk
@@ -42,8 +42,23 @@ jobs:
           wget -nv https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
           mkdir img
           tar -xf debian-11-generic-amd64.tar.xz -C img
-      - name: Run target OS (for cloud-init actions)
+      - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -m 2048 -nographic -drive format=raw,file=img/`ls -1 img` -drive format=raw,file=init.img
+      - name: Run target OS
+        run: sudo screen -dmS qemu qemu-system-x86_64 -net nic -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=raw,file=img/`ls -1 img`
+      - name: Check that target OS is running
+        run: |
+          sleep 1
+          sudo screen -ls
+      - name: Wait for ssh connection
+        timeout-minutes: 30
+        run: >
+          while ! ssh -o StrictHostKeyChecking=accept-new -p2222 user@localhost "exit 0";
+          do;
+          echo "Trying ssh";
+          sleep 5;
+          done;
+          cat ~/.ssh/known_hosts
 
   Build-and-Test:
     if: ${{ false }} # disable for now
