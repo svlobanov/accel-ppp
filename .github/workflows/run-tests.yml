@@ -26,20 +26,25 @@ jobs:
             untar: false
             format: qcow2
 
+          - distro: Debian13
+            image: https://cloud.debian.org/images/cloud/sid/daily/latest/debian-sid-generic-arm64-daily.tar.xz
+            untar: true
+            format: raw
+
           - distro: Debian12
-            image: https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-generic-amd64-daily.tar.xz
+            image: https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.tar.xz
             untar: true
             format: raw
-
-          - distro: Debian11
-            image: https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
-            untar: true
-            format: raw
-
-          - distro: Debian10
-            image: https://cloud.debian.org/images/cloud/buster/latest/debian-10-generic-amd64.tar.xz
-            untar: true
-            format: raw
+#
+#          - distro: Debian11
+#            image: https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.tar.xz
+#            untar: true
+#            format: raw
+#
+#          - distro: Debian10
+#            image: https://cloud.debian.org/images/cloud/buster/latest/debian-10-generic-amd64.tar.xz
+#            untar: true
+#            format: raw
 
     steps:
       - name: Check out repository code
