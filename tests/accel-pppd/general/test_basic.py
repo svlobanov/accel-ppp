@@ -19,9 +19,11 @@ def accel_pppd_config():
     log_tcp
     #log_pgsql
 
+    connlimit
     pptp
     l2tp
     sstp
+    radius
     pppoe
     ipoe
 
@@ -30,7 +32,6 @@ def accel_pppd_config():
     auth_chap_md5
     auth_pap
 
-    radius
     chap-secrets
 
     ippool
@@ -38,8 +39,7 @@ def accel_pppd_config():
     pppd_compat
     shaper
     #net-snmp
-    logwtmp
-    connlimit
+    #logwtmp
 
     ipv6_nd
     ipv6_dhcp

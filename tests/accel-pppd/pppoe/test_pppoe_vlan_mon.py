@@ -13,15 +13,23 @@ def accel_pppd_config(veth_pair_netns):
     print(veth_pair_netns)
     return """
     [modules]
+    radius
     pppoe
+
+    [core]
+    log-error=/dev/stderr
 
     [log]
     log-debug=/dev/stdout
+    log-file=/dev/stdout
+    log-emerg=/dev/stderr
     level=5
 
     [cli]
     tcp=127.0.0.1:2001
 
+    [radius]
+    
     [pppoe]
     ac-name=test-accel
     vlan-mon=%s,10-20
