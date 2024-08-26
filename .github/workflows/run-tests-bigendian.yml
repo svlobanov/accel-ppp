@@ -60,6 +60,23 @@ jobs:
           sleep 5;
           done;
           cat ~/.ssh/known_hosts
-      - name: poweroff
-        run: ssh -i ssh-key -p2222 root@localhost "fdisk -l ; poweroff"
-
+      - name: Setup alpine to disk
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "setup-alpine -c setup.cfg &&
+          sed -i '/^ROOTSSHKEY\|^DISKOPTS\|^APKREPOSOPTS=/d' setup.cfg &&
+          echo '' >> setup.cfg &&
+          echo 'DISKOPTS=\"-m sys /dev/vda\"' >> setup.cfg &&
+          echo 'ROOTSSHKEY=\"http://192.0.2.1:8000/ssh-key.pub\"' >> setup.cfg &&
+          echo 'APKREPOSOPTS=\"https://dl-cdn.alpinelinux.org/alpine/latest-stable/main\"' >> setup.cfg &&
+          cat setup.cfg &&
+          yes | setup-alpine -e -f setup.cfg"
+      - name: Poweroff the VM
+        run: ssh -i ssh-key -p2222 root@localhost "poweroff" || echo poweroff
+      - name: Wait for poweroff
+        timeout-minutes: 30
+        run: >
+          while screen -ls;
+          do
+          echo "Waiting for poweroff";
+          sleep 5;
+          done;
