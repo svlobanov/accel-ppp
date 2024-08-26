@@ -73,14 +73,14 @@ jobs:
           cat ~/.ssh/known_hosts
       - name: Setup alpine to disk
         run: >
-          ssh -i ssh-key -p2222 root@localhost "setup-alpine -c setup.cfg &&
-          sed -i '/^ROOTSSHKEY\|^DISKOPTS\|^APKREPOSOPTS=/d' setup.cfg &&
-          echo '' >> setup.cfg &&
-          echo 'DISKOPTS=\"-m sys /dev/vda\"' >> setup.cfg &&
-          echo 'ROOTSSHKEY=\"http://192.0.2.1:8000/ssh-key.pub\"' >> setup.cfg &&
-          echo 'APKREPOSOPTS=\"https://dl-cdn.alpinelinux.org/alpine/latest-stable/main\"' >> setup.cfg &&
-          cat setup.cfg &&
-          yes | setup-alpine -e -f setup.cfg"
+          ssh -i ssh-key -p2222 root@localhost "setup-alpine -c setup_alpine_conf &&
+          sed -i '/^ROOTSSHKEY\|^DISKOPTS\|^APKREPOSOPTS=/d' setup_alpine_conf &&
+          echo '' >> setup_alpine_conf &&
+          echo 'DISKOPTS=\"-m sys /dev/vda\"' >> setup_alpine_conf &&
+          echo 'ROOTSSHKEY=\"http://192.0.2.1:8000/ssh-key.pub\"' >> setup_alpine_conf &&
+          echo 'APKREPOSOPTS=\"https://dl-cdn.alpinelinux.org/alpine/latest-stable/main\"' >> setup_alpine_conf &&
+          cat setup_alpine_conf &&
+          yes | setup-alpine -e -f setup_alpine_conf"
       - name: Poweroff the VM
         timeout-minutes: 30
         run: >
