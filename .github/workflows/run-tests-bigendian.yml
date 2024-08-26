@@ -35,10 +35,9 @@ jobs:
         run: |
           sudo ip addr add 192.0.2.1/32 dev lo # stable ip for http server 
           screen -dmS httpserver python3 -m http.server 8000
-          curl http://192.0.2.1:8000/ssh-key.pub || (sleep 1 && curl http://192.0.2.1:8000/ssh-key.pub )
       - name: Run target OS first time (for setup actions)
         run: >
-          sudo screen -dmS qemu-system-s390x -M s390-ccw-virtio
+          sudo screen -dmS qemu qemu-system-s390x -M s390-ccw-virtio
             -m 4096 -smp 2 -nographic
             -net nic -net user,hostfwd=tcp::2222-:22
             -hda disk.img,format=raw
