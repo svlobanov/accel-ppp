@@ -71,12 +71,89 @@ jobs:
           cat setup.cfg &&
           yes | setup-alpine -e -f setup.cfg"
       - name: Poweroff the VM
-        run: ssh -i ssh-key -p2222 root@localhost "poweroff" || echo poweroff
-      - name: Wait for poweroff
-        timeout-minutes: 30
         run: >
-          while screen -ls;
+          ssh -i ssh-key -p2222 root@localhost "poweroff" &&
+          while sudo screen -ls;
           do
           echo "Waiting for poweroff";
           sleep 5;
           done;
+      - name: Run target OS
+        run: >
+          sudo screen -dmS qemu
+          qemu-system-s390x -M s390-ccw-virtio
+          -m 4096 -smp 2 -nographic
+          -net nic -net user,hostfwd=tcp::2222-:22
+          -drive format=raw,file=disk.raw
+      - name: Check that target OS is running
+        run: |
+          sleep 1
+          sudo screen -ls
+      - name: Wait for ssh connection
+        timeout-minutes: 30
+        run: >
+          while ! ssh -o StrictHostKeyChecking=accept-new -p2222 -o ConnectTimeout=5 -i ssh-key root@localhost "exit 0";
+          do
+          echo "Trying to establish ssh connection";
+          sleep 5;
+          done;
+          cat ~/.ssh/known_hosts
+      - name: Display free space, current dir, kernel version and users
+        run: |
+          ssh -i ssh-key -p2222 root@localhost "df -h"
+          ssh -i ssh-key -p2222 root@localhost "pwd"
+          ssh -i ssh-key -p2222 root@localhost "uname -a"
+          ssh -i ssh-key -p2222 root@localhost "cat /etc/passwd"
+      - name: Install build tools (on target OS)
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "apkrepos -o && apk add --no-cache git cmake make g++ pcre-dev libressl-dev linux-headers libucontext-dev lua5.1-dev linux-lts-dev py3-pip 
+          ppp ppp-pppoe && 
+          (pip3 install pytest pytest-dependency pytest-order || pip3 install --break-system-packages pytest pytest-dependency pytest-order)"
+      - name: Copy source code to target OS
+        run: |
+          tar -Jcf accel-ppp.tar.xz accel-ppp
+          scp -i ssh-key -P2222 accel-ppp.tar.xz root@localhost:
+          ssh -i ssh-key -p2222 rooot@localhost "tar -xf accel-ppp.tar.xz"
+      - name: Build accel-ppp
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
+          mkdir build && cd build &&
+          cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
+          -DKDIR=/usr/src/linux-headers-\`uname -r\` 
+          -DLUA=TRUE -DSHAPER=TRUE -DRADIUS=TRUE .. &&
+          make && make install"
+      - name: Run tests (not related to ipoe and vlan_mon drivers)
+        timeout-minutes: 5
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp/tests && 
+          python3 -m pytest -Wall --order-dependencies -v -m \"not ipoe_driver and not vlan_mon_driver\""
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: ssh -i ssh-key -p2222 root@localhost "ps aux | grep accel- && dmesg"
+      - name: Insert ipoe kernel module
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
+          insmod build/drivers/ipoe/driver/ipoe.ko &&
+          lsmod | grep ipoe"
+      - name: Run tests (not related to vlan_mon drivers)
+        timeout-minutes: 5
+        if: ${{ always() }}
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp/tests && 
+          python3 -m pytest -Wall --order-dependencies -v -m \"not vlan_mon_driver\""
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: ssh -i ssh-key -p2222 root@localhost "ps aux | grep accel- && dmesg"
+      - name: Insert vlan_mon kernel module
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
+          insmod build/drivers/vlan_mon/driver/vlan_mon.ko &&
+          lsmod | grep vlan_mon"
+      - name: Run tests (all)
+        timeout-minutes: 5
+        run: >
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp/tests && 
+          python3 -m pytest -Wall --order-dependencies -v"
+      - name: Display processes and dmesg after tests
+        if: ${{ always() }}
+        run: ssh -i ssh-key -p2222 root@localhost "ps aux | grep accel- && dmesg"
