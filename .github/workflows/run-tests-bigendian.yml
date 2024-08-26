@@ -128,7 +128,7 @@ jobs:
           ssh -i ssh-key -p2222 root@localhost "tar -xf accel-ppp.tar.xz"
       - name: Build accel-ppp
         run: >
-          ssh -i ssh-key -p2222 root@localhost " cd accel-ppp && git config --global --add safe.directory '*' &&
+          ssh -i ssh-key -p2222 root@localhost "cd accel-ppp && git config --global --add safe.directory '*' &&
           mkdir build && cd build &&
           cmake -DBUILD_IPOE_DRIVER=TRUE -DBUILD_VLAN_MON_DRIVER=TRUE -DCMAKE_INSTALL_PREFIX=/usr 
           -DKDIR=/usr/src/linux-headers-\`uname -r\` 
