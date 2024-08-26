@@ -1,0 +1,65 @@
+name: Run tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - be
+
+jobs:
+
+  Test-in-Alpine-s390x:
+    #if: ${{ false }} # disable for now
+    runs-on: ubuntu-24.04
+    name: Test in Qemu (s390x Alpine)
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: "accel-ppp"
+      - name: Install qemu and required tools
+        run: >
+          sudo apt update && 
+          NEEDRESTART_SUSPEND=1 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true sudo -E apt -y install qemu-system-s390x qemu-utils wget openssh-client screen
+      - name: Prepare qemu files
+        run: |
+          ssh-keygen -t ed25519 -q -N "" -f ssh-key
+          qemu-img create -f raw disk.img 5G
+          wget -nv https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/s390x/netboot/vmlinuz-lts
+          wget -nv https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/s390x/netboot/initramfs-lts
+      - name: Run http server for ssh-key
+        run: |
+          sudo ip addr add 192.0.2.1/32 dev lo # stable ip for http server 
+          screen -dmS python3 -m http.server 8000
+          curl http://192.0.2.1:8000/ssh-key.pub || (sleep 1 && curl http://192.0.2.1:8000/ssh-key.pub )
+      - name: Run target OS first time (for setup actions)
+        run: >
+          sudo screen -dmS qemu-system-s390x -M s390-ccw-virtio
+            -m 4096 -smp 2 -nographic
+            -net nic -net user,hostfwd=tcp::2222-:22
+            -hda disk.img,format=raw
+            -kernel vmlinuz-lts
+            -initrd initramfs-lts
+            -append "ip=dhcp alpine_repo=https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+                     modloop=https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/s390x/netboot/modloop-lts
+                     ssh_key=http://192.0.2.1:8000/ssh-key.pub"
+      - name: Check that target OS is running
+        run: |
+          sleep 1
+          sudo screen -ls
+      - name: Wait for ssh connection
+        timeout-minutes: 30
+        run: >
+          while ! ssh -o StrictHostKeyChecking=accept-new -p2222 -o ConnectTimeout=5 -i ssh-key root@localhost "exit 0";
+          do
+          echo "Trying to establish ssh connection";
+          sleep 5;
+          done;
+          cat ~/.ssh/known_hosts
+      - name: poweroff
+        run: ssh -i ssh-key -p2222 root@localhost "poweroff"
+
