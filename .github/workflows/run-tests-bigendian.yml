@@ -34,7 +34,7 @@ jobs:
       - name: Run http server for ssh-key
         run: |
           sudo ip addr add 192.0.2.1/32 dev lo # stable ip for http server 
-          screen -dmS python3 -m http.server 8000
+          screen -dmS httpserver python3 -m http.server 8000
           curl http://192.0.2.1:8000/ssh-key.pub || (sleep 1 && curl http://192.0.2.1:8000/ssh-key.pub )
       - name: Run target OS first time (for setup actions)
         run: >
