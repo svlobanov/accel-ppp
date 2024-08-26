@@ -39,6 +39,7 @@ jobs:
         run: >
           sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
+          -cpu max,zpci=on
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
           -drive format=raw,file=disk.raw
@@ -71,6 +72,7 @@ jobs:
           cat setup.cfg &&
           yes | setup-alpine -e -f setup.cfg"
       - name: Poweroff the VM
+        timeout-minutes: 30
         run: >
           ssh -i ssh-key -p2222 root@localhost "poweroff" &&
           while sudo screen -ls;
@@ -82,6 +84,7 @@ jobs:
         run: >
           sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
+          -cpu max,zpci=on
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
           -drive format=raw,file=disk.raw
@@ -106,7 +109,7 @@ jobs:
           ssh -i ssh-key -p2222 root@localhost "cat /etc/passwd"
       - name: Install build tools (on target OS)
         run: >
-          ssh -i ssh-key -p2222 root@localhost "apkrepos -o && apk add --no-cache git cmake make g++ pcre-dev libressl-dev linux-headers libucontext-dev lua5.1-dev linux-lts-dev py3-pip 
+          ssh -i ssh-key -p2222 root@localhost "setup-apkrepos -o && apk add --no-cache git cmake make g++ pcre-dev libressl-dev linux-headers libucontext-dev lua5.1-dev linux-lts-dev py3-pip 
           ppp ppp-pppoe && 
           (pip3 install pytest pytest-dependency pytest-order || pip3 install --break-system-packages pytest pytest-dependency pytest-order)"
       - name: Copy source code to target OS
