@@ -48,7 +48,6 @@ jobs:
           screen -dmS httpserver python3 -m http.server 8000
       - name: Run target OS first time (for setup actions)
         run: >
-          sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
