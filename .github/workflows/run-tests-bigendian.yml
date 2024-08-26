@@ -39,7 +39,6 @@ jobs:
         run: >
           sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
-          -cpu max,zpci=on
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
           -drive format=raw,file=disk.raw
@@ -84,7 +83,6 @@ jobs:
         run: >
           sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
-          -cpu max,zpci=on
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
           -drive format=raw,file=disk.raw
@@ -140,7 +138,6 @@ jobs:
           lsmod | grep ipoe"
       - name: Run tests (not related to vlan_mon drivers)
         timeout-minutes: 5
-        if: ${{ always() }}
         run: >
           ssh -i ssh-key -p2222 root@localhost "cd accel-ppp/tests && 
           python3 -m pytest -Wall --order-dependencies -v -m \"not vlan_mon_driver\""
