@@ -28,7 +28,7 @@ jobs:
       - name: Prepare qemu files
         run: |
           ssh-keygen -t ed25519 -q -N "" -f ssh-key
-          qemu-img create -f raw disk.img 5G
+          qemu-img create -f raw disk.raw 5G
           wget -nv https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/s390x/netboot/vmlinuz-lts
           wget -nv https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/s390x/netboot/initramfs-lts
       - name: Run http server for ssh-key
@@ -37,10 +37,11 @@ jobs:
           screen -dmS httpserver python3 -m http.server 8000
       - name: Run target OS first time (for setup actions)
         run: >
+          sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
-          -hda disk.img,format=raw
+          -drive disk.raw,format=raw
           -kernel vmlinuz-lts
           -initrd initramfs-lts
           -append "ip=dhcp alpine_repo=https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
@@ -60,5 +61,5 @@ jobs:
           done;
           cat ~/.ssh/known_hosts
       - name: poweroff
-        run: ssh -i ssh-key -p2222 root@localhost "poweroff"
+        run: ssh -i ssh-key -p2222 root@localhost "fdisk -l ; poweroff"
 
