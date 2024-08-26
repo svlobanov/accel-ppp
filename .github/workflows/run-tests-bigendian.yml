@@ -108,13 +108,13 @@ jobs:
       - name: Install build tools (on target OS)
         run: >
           ssh -i ssh-key -p2222 root@localhost "setup-apkrepos -o && apk add --no-cache git cmake make g++ pcre-dev openssl-dev linux-headers libucontext-dev lua5.1-dev linux-lts-dev py3-pip 
-          ppp ppp-pppoe && 
+          ppp ppp-pppoe iproute2 dhclient && 
           (pip3 install pytest pytest-dependency pytest-order || pip3 install --break-system-packages pytest pytest-dependency pytest-order)"
       - name: Copy source code to target OS
         run: |
           tar -Jcf accel-ppp.tar.xz accel-ppp
           scp -i ssh-key -P2222 accel-ppp.tar.xz root@localhost:
-          ssh -i ssh-key -p2222 rooot@localhost "tar -xf accel-ppp.tar.xz"
+          ssh -i ssh-key -p2222 root@localhost "tar -xf accel-ppp.tar.xz"
       - name: Build accel-ppp
         run: >
           ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
