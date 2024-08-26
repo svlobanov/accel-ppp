@@ -26,14 +26,14 @@ jobs:
           sudo apt update && 
           NEEDRESTART_SUSPEND=1 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
           sudo -E apt -y install wget openssh-client screen
-          libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
+          libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev libslirp-dev ninja-build
       - name: Build Qemu 9.0.2
         # Qemu 8.2 from Ubuntu24.04 has critical s390x-related bugs so Qemu9 is required
         run: |
-          wget https://github.com/qemu/qemu/archive/refs/tags/v9.0.2.tar.gz
+          wget -nv https://github.com/qemu/qemu/archive/refs/tags/v9.0.2.tar.gz
           tar -xf v9.0.2.tar.gz
           cd qemu-9.0.2
-          ./configure --target-list=s390x-softmmu
+          ./configure --target-list=s390x-softmmu --enable-slirp
           make -j
           sudo make install
       - name: Prepare qemu files
@@ -48,6 +48,7 @@ jobs:
           screen -dmS httpserver python3 -m http.server 8000
       - name: Run target OS first time (for setup actions)
         run: >
+          sudo screen -dmS qemu
           qemu-system-s390x -M s390-ccw-virtio
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
