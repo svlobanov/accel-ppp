@@ -41,7 +41,7 @@ jobs:
           qemu-system-s390x -M s390-ccw-virtio
           -m 4096 -smp 2 -nographic
           -net nic -net user,hostfwd=tcp::2222-:22
-          -drive file=format=raw,disk.raw
+          -drive format=raw,file=disk.raw
           -kernel vmlinuz-lts
           -initrd initramfs-lts
           -append "ip=dhcp alpine_repo=https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
