@@ -139,7 +139,7 @@ static int terminate_exec1(char * const *f, int f_cnt, void *cli)
 	if (!re) {
 		PCRE2_UCHAR err_msg[64];
 		pcre2_get_error_message(pcre_err, err_msg, sizeof(err_msg));
-		cli_sendv(cli, "match: %s at %i\r\n", pcre_err, pcre_offset);
+		cli_sendv(cli, "match: %s at %i\r\n", err_msg, (int)pcre_offset);
 		return CLI_CMD_OK;
 	}
 
