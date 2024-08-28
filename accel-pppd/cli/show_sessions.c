@@ -267,10 +267,13 @@ static int show_ses_exec(const char *cmd, char * const *f, int f_cnt, void *cli)
 			row = list_entry(t_list.next, typeof(*row), entry);
 			list_del(&row->entry);
 			if (match_key) {
-				if (pcre2_match(re, (PCRE2_SPTR)row->match_key, strlen(row->match_key), 0, 0, NULL, NULL) < 0) {
+                pcre2_match_data *match_data = pcre2_match_data_create(0, NULL);
+				if (pcre2_match(re, (PCRE2_SPTR)row->match_key, strlen(row->match_key), 0, 0, match_data, NULL) < 0) {
 					free_row(row);
+                    pcre2_match_data_free(match_data);
 					continue;
 				}
+                pcre2_match_data_free(match_data);
 			}
 			if (order_key)
 				insert_row(&r_list, row);
