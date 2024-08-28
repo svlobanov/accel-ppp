@@ -27,7 +27,6 @@ static const char *def_cli_prompt = "accel-ppp";
 char *conf_cli_prompt;
 
 static LIST_HEAD(simple_cmd_list);
-static LIST_HEAD(regexp_cmd_list);
 
 void __export cli_register_simple_cmd(struct cli_simple_cmd_t *cmd)
 {
@@ -123,7 +122,6 @@ static int split(char *buf, char **ptr)
 
 static int cli_process_help_cmd(struct cli_client_t *cln)
 {
-	struct cli_regexp_cmd_t *recmd = NULL;
 	struct cli_simple_cmd_t *sicmd = NULL;
 	char *cmd = (char *)cln->cmdline;
 	char *items[MAX_CMD_ITEMS] = { 0 };
@@ -142,16 +140,6 @@ static int cli_process_help_cmd(struct cli_client_t *cln)
 	if (cmd[0] == '\0')
 		/* "help" with no argument always succeeds */
 		cmd_found = 1;
-
-	list_for_each_entry(recmd, &regexp_cmd_list, entry) {
-		if (cmd[0] == '\0'
-		    || pcre_exec(recmd->h_re, NULL, cmd, strlen(cmd),
-				 0, 0, NULL, 0) >= 0) {
-			cmd_found = 1;
-			if (recmd->help)
-				recmd->help(cmd, cln);
-		}
-	}
 
 	nb_items = split(cmd, items);
 	list_for_each_entry(sicmd, &simple_cmd_list, entry) {
@@ -175,28 +163,6 @@ static int cli_process_help_cmd(struct cli_client_t *cln)
 		cli_send(cln, MSG_INVAL_ERROR);
 
 	return 1;
-}
-
-static int cli_process_regexp_cmd(struct cli_client_t *cln, int *err)
-{
-	struct cli_regexp_cmd_t *recmd = NULL;
-	char *cmd = (char *)cln->cmdline;
-	int found = 0;
-	int res;
-
-	cmd = skip_space(cmd);
-	list_for_each_entry(recmd, &regexp_cmd_list, entry)
-		if (pcre_exec(recmd->re, NULL, cmd, strlen(cmd),
-			      0, 0, NULL, 0) >= 0) {
-			found = 1;
-			res = recmd->exec(cmd, cln);
-			if (res != CLI_CMD_OK)
-				break;
-		}
-	if (found)
-		*err = res;
-
-	return found;
 }
 
 static int cli_process_simple_cmd(struct cli_client_t *cln, int *err)
@@ -238,10 +204,7 @@ int __export cli_process_cmd(struct cli_client_t *cln)
 	if (cli_process_help_cmd(cln))
 		return 0;
 
-	found = cli_process_regexp_cmd(cln, &err);
-	if (found && err != CLI_CMD_OK)
-		goto out_found;
-
+    found = 0;
 	found |= cli_process_simple_cmd(cln, &err);
 	if (found)
 		goto out_found;
