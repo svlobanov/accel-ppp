@@ -22,6 +22,19 @@ struct cli_simple_cmd_t
 	void (*help)(char * const *fields, int field_cnt, void *client);
 };
 
+struct cli_regexp_cmd_t
+{
+	struct list_head entry;
+	pcre *re;
+	const char *pattern;
+	int options;
+	int (*exec)(const char *cmd, void *client);
+	pcre *h_re;
+	const char *h_pattern;
+	int h_options;
+	int (*help)(const char *cmd, void *client);
+};
+
 struct ap_session;
 
 void cli_register_simple_cmd(struct cli_simple_cmd_t *cmd);
