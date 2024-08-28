@@ -33,6 +33,16 @@ IF(NOT PCRE_LIBRARY)
 	message(FATAL_ERROR "${Esc}[31mRequired libpcre not found.\n Install libpcre3-dev and run cmake again${Esc}[m")
 ENDIF(NOT PCRE_LIBRARY)
 
+#Check libpcre2
+find_library(PCRE2_LIBRARY pcre2-8
+	HINTS ${CMAKE_SOURCE_DIR}/lib/linux/gcc/${BIT}/lib
+	PATHS ${CMAKE_SOURCE_DIR}/lib/linux/gcc/${BIT}/lib
+)
+
+IF(NOT PCRE2_LIBRARY)
+	message(FATAL_ERROR "${Esc}[31mRequired libpcre not found.\n Install libpcre2-dev and run cmake again${Esc}[m")
+ENDIF(NOT PCRE2_LIBRARY)
+
 
 IF (EXISTS ${CMAKE_HOME_DIRECTORY}/.git AND NOT IGNORE_GIT)
 	EXECUTE_PROCESS(
