@@ -6,8 +6,6 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #include <linux/if_link.h>
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
 
 #include "triton.h"
 #include "events.h"
@@ -173,9 +171,8 @@ static int show_ses_exec(const char *cmd, char * const *f, int f_cnt, void *cli)
 	if (match_key) {
 		re = pcre2_compile((PCRE2_SPTR)match_pattern, PCRE2_ZERO_TERMINATED, 0, &pcre_err, &pcre_offset, NULL);
 		if (!re) {
-            PCRE2_UCHAR err_msg[64];
-            pcre2_get_error_message(pcre_err, err_msg, sizeof(err_msg));
-
+			PCRE2_UCHAR err_msg[64];
+			pcre2_get_error_message(pcre_err, err_msg, sizeof(err_msg));
 			cli_sendv(cli, "match: %s at %i\r\n", err_msg, (int)pcre_offset);
 			return CLI_CMD_OK;
 		}
@@ -267,13 +264,13 @@ static int show_ses_exec(const char *cmd, char * const *f, int f_cnt, void *cli)
 			row = list_entry(t_list.next, typeof(*row), entry);
 			list_del(&row->entry);
 			if (match_key) {
-                pcre2_match_data *match_data = pcre2_match_data_create(0, NULL);
+				pcre2_match_data *match_data = pcre2_match_data_create(0, NULL);
 				if (pcre2_match(re, (PCRE2_SPTR)row->match_key, strlen(row->match_key), 0, 0, match_data, NULL) < 0) {
 					free_row(row);
-                    pcre2_match_data_free(match_data);
+					pcre2_match_data_free(match_data);
 					continue;
 				}
-                pcre2_match_data_free(match_data);
+				pcre2_match_data_free(match_data);
 			}
 			if (order_key)
 				insert_row(&r_list, row);
