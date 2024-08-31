@@ -144,13 +144,15 @@ static int cli_process_help_cmd(struct cli_client_t *cln)
 		cmd_found = 1;
 
 	list_for_each_entry(recmd, &regexp_cmd_list, entry) {
+		pcre2_match_data *match_data = pcre2_match_data_create(0, NULL);
 		if (cmd[0] == '\0'
-		    || pcre_exec(recmd->h_re, NULL, cmd, strlen(cmd),
-				 0, 0, NULL, 0) >= 0) {
+		    || pcre2_match(recmd->h_re, (PCRE2_SPTR)cmd, strlen(cmd),
+				 0, 0, match_data, NULL) >= 0) {
 			cmd_found = 1;
 			if (recmd->help)
 				recmd->help(cmd, cln);
 		}
+		pcre2_match_data_free(match_data);
 	}
 
 	nb_items = split(cmd, items);
@@ -185,14 +187,19 @@ static int cli_process_regexp_cmd(struct cli_client_t *cln, int *err)
 	int res;
 
 	cmd = skip_space(cmd);
-	list_for_each_entry(recmd, &regexp_cmd_list, entry)
-		if (pcre_exec(recmd->re, NULL, cmd, strlen(cmd),
-			      0, 0, NULL, 0) >= 0) {
+	list_for_each_entry(recmd, &regexp_cmd_list, entry) {
+		pcre2_match_data *match_data = pcre2_match_data_create(0, NULL);
+		if (pcre2_match(recmd->re, (PCRE2_SPTR)cmd, strlen(cmd),
+			      0, 0, match_data, NULL) >= 0) {
 			found = 1;
 			res = recmd->exec(cmd, cln);
-			if (res != CLI_CMD_OK)
+			if (res != CLI_CMD_OK) {
+				pcre2_match_data_free(match_data);
 				break;
+			}
 		}
+		pcre2_match_data_free(match_data);
+	}
 	if (found)
 		*err = res;
 

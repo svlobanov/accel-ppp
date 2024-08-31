@@ -25,11 +25,11 @@ struct cli_simple_cmd_t
 struct cli_regexp_cmd_t
 {
 	struct list_head entry;
-	pcre *re;
+	pcre2_code *re;
 	const char *pattern;
 	int options;
 	int (*exec)(const char *cmd, void *client);
-	pcre *h_re;
+	pcre2_code *h_re;
 	const char *h_pattern;
 	int h_options;
 	int (*help)(const char *cmd, void *client);
