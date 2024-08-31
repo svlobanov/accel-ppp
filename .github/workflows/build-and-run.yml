@@ -34,7 +34,7 @@ jobs:
           sudo apt update && 
           NEEDRESTART_SUSPEND=1 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true sudo -E apt -y install
           git build-essential cmake gcc linux-headers-`uname -r`
-          libpcre3-dev libpcre2-dev libssl-dev liblua5.1-0-dev kmod
+          libpcre2-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
@@ -118,7 +118,7 @@ jobs:
           apt update && apt -y upgrade && apt -y dist-upgrade &&
           NEEDRESTART_SUSPEND=1 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt -y install git build-essential cmake gcc 
           linux-headers-${{ env.HEADERS_SUFFIX }}
-          libpcre3-dev libpcre2-dev libssl-dev liblua5.1-0-dev kmod
+          libpcre2-dev libssl-dev liblua5.1-0-dev kmod
       - name: Get kernel name from headers
         run: >
           echo KERNEL_NAME=`ls -1 /usr/src/ | grep  'linux-headers.*${{ env.HEADERS_SUFFIX }}' | 
@@ -177,7 +177,7 @@ jobs:
         run: >
           apt update && apt -y upgrade && apt -y dist-upgrade &&
           DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt -y install git build-essential cmake gcc
-          linux-headers-generic libpcre3-dev libpcre2-dev libssl-dev liblua5.1-0-dev kmod software-properties-common
+          linux-headers-generic libpcre2-dev libssl-dev liblua5.1-0-dev kmod software-properties-common
           pkexec dbus linux-base &&
           add-apt-repository -y ppa:cappelikan/ppa && apt update &&
           service dbus start &&
