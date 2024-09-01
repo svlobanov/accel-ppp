@@ -259,8 +259,8 @@ jobs:
           docker exec gentoo getuto
       - name: Install build tools
         run: |
-          docker exec gentoo sh -c 'emerge -g --autounmask-write sys-kernel/gentoo-kernel-bin || (etc-update --verbose --automode -5 && emerge -g sys-kernel/gentoo-kernel-bin)'
           docker exec gentoo emerge -g dev-vcs/git dev-libs/libpcre dev-build/cmake dev-lang/lua:5.1
+          docker exec gentoo sh -c 'emerge -g --autounmask-write sys-kernel/gentoo-kernel-bin || (etc-update --verbose --automode -5 && emerge -g sys-kernel/gentoo-kernel-bin)'
       - name: stop
         run: echo 1
       - name: Check out repository code
