@@ -255,7 +255,7 @@ jobs:
       - name: Prepare Gentoo Docker image
         run: |
           docker create -v /var/db/repos/gentoo --name portagesnapshot gentoo/portage:latest /bin/true
-          docker run -d --name gentoo --volumes-from portagesnapshot gentoo/stage3:latest
+          docker run -di --name gentoo --volumes-from portagesnapshot gentoo/stage3:latest /bin/bash
           docker exec gentoo getuto
       - name: Install build tools
         run: |
