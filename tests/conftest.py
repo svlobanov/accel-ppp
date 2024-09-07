@@ -1,10 +1,11 @@
 import pytest
-from common import accel_pppd_process, config, veth
+from common import accel_pppd_process, config, veth, radius_process
 
 
 def pytest_addoption(parser):
     parser.addoption("--accel_cmd", action="store", default="accel-cmd")
     parser.addoption("--accel_pppd", action="store", default="accel-pppd")
+    parser.addoption("--radius", action="store", default="freeradius")
     parser.addoption("--pppd", action="store", default="pppd")  # pppd client
     parser.addoption(
         "--dhclient", action="store", default="dhclient"
@@ -81,10 +82,12 @@ def accel_pppd_instance(accel_pppd, accel_pppd_config_file, accel_cmd, pytestcon
         pytestconfig.getoption("accel_pppd_max_finish_time"),
     )
 
+
 # defines vlans that will be created over veth pair (might be redefined by specific test)
 @pytest.fixture()
 def veth_pair_vlans_config():
     return {"vlans_a": [], "vlans_b": []}
+
 
 # setup and teardown for netns and veth pair
 @pytest.fixture()
@@ -97,6 +100,7 @@ def veth_pair_netns(veth_pair_vlans_config):
 
     # test teardown:
     veth.delete_veth_pair_netns(veth_pair_netns_instance)
+
 
 # chap-secrets configuration as string (should be redefined by specific test)
 @pytest.fixture()
@@ -115,3 +119,49 @@ def chap_secrets_config_file(chap_secrets_config):
 
     # test teardown:
     config.delete_tmp(filename)
+
+
+# accel-pppd executable file name
+@pytest.fixture()
+def radius(pytestconfig):
+    return pytestconfig.getoption("radius")
+
+
+# radius configuration as string (should be redefined by specific test)
+@pytest.fixture()
+def radius_config():
+    return ""
+
+
+# radius configuration file name
+@pytest.fixture()
+def radius_config_file(radius_config):
+    # test setup:
+    filename = config.make_tmp(radius_config)
+
+    # test execution
+    yield filename
+
+    # test teardown:
+    config.delete_tmp(filename)
+
+
+# setup and teardown for tests that required running accel-pppd
+@pytest.fixture()
+def radius_instance(radius, radius_config_file, accel_cmd, pytestconfig):
+    # test setup:
+    is_started, radius_thread, radius_control = radius_process.start(
+        radius,
+        ["-c" + radius_config_file],
+    )
+
+    # test execution:
+    yield is_started
+
+    # test teardown:
+    radius_process.end(
+        radius_thread,
+        radius_control,
+        accel_cmd,
+        pytestconfig.getoption("radius_max_finish_time"),
+    )
