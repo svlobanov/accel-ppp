@@ -143,6 +143,7 @@ jobs:
         if: ${{ always() }}
         run: ssh -i ssh-key -p2222 -o ConnectTimeout=5  root@localhost "ps aux | grep accel- && dmesg"
       - name: Insert ipoe kernel module
+        if: ${{ always() }}
         run: >
           ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
           insmod build/drivers/ipoe/driver/ipoe.ko &&
@@ -156,6 +157,7 @@ jobs:
         if: ${{ always() }}
         run: ssh -i ssh-key -p2222 -o ConnectTimeout=5  root@localhost "ps aux | grep accel- && dmesg"
       - name: Insert vlan_mon kernel module
+        if: ${{ always() }}
         run: >
           ssh -i ssh-key -p2222 root@localhost "cd accel-ppp &&
           insmod build/drivers/vlan_mon/driver/vlan_mon.ko &&
