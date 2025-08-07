@@ -139,7 +139,7 @@ jobs:
           -DCPACK_TYPE=${{ env.CPACK_TYPE }} ..
       - name: make
         working-directory: ./build
-        run: make
+        run: HOSTCC=gcc make
       - name: Generate debian package
         working-directory: ./build
         run: cpack -G DEB
