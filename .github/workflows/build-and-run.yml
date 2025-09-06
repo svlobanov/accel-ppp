@@ -20,6 +20,9 @@ jobs:
           - distro: ubuntu-24.04
             pkg-distro: ubuntu24.04
             cpack-type: Ubuntu24
+          - distro: ubuntu-24.04-arm
+            pkg-distro: ubuntu24.04
+            cpack-type: Ubuntu24
     runs-on: ${{ matrix.distro }}
     steps:
       - name: Set common vars
@@ -90,7 +93,8 @@ jobs:
             "ubuntu:24.04",
             "ubuntu:devel"
           ]
-    runs-on: ubuntu-24.04
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     container:
       image: ${{ matrix.distro }}
     steps:
@@ -215,7 +219,11 @@ jobs:
         run: accel-cmd show stat
 
   Build-in-Container-Alpine:
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     container:
       image: alpine:latest
     steps:
@@ -287,7 +295,11 @@ jobs:
         run: accel-cmd show stat
 
   Build-in-Container-Fedora:
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     container:
       image: fedora:rawhide
     steps:
