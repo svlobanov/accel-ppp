@@ -36,7 +36,7 @@ jobs:
           git build-essential cmake gcc linux-headers-`uname -r`
           libpcre2-dev libssl-dev liblua5.1-0-dev kmod
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: mkdir build
