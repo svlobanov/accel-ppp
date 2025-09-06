@@ -313,7 +313,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: ["ubuntu-24.04", "ubuntu-22.04"]
+        distro: [ "ubuntu-24.04", "ubuntu-22.04", "ubuntu-24.04-arm"]
 
     runs-on: ${{ matrix.distro }}
     steps:
