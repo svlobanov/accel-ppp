@@ -31,6 +31,11 @@ jobs:
             untar: true
             format: raw
 
+          - distro: Debian13-GC
+            image: https://cdimage.debian.org/images/cloud/trixie/daily/latest/debian-13-genericcloud-amd64-daily.tar.xz
+            untar: true
+            format: raw
+
           - distro: Debian12
             image: https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.tar.xz
             untar: true
