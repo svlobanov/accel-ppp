@@ -31,6 +31,11 @@ jobs:
             untar: true
             format: raw
 
+          - distro: Debian13-GC
+            image: https://cdimage.debian.org/images/cloud/trixie/daily/latest/debian-13-genericcloud-amd64-daily.tar.xz
+            untar: true
+            format: raw
+
           - distro: Debian12
             image: https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.tar.xz
             untar: true
@@ -86,9 +91,9 @@ jobs:
           wget -nv ${{ matrix.image }} -O img/image
           qemu-img resize -f ${{ matrix.format }} img/`ls -1 img` +2G
       - name: Run target OS first time (for cloud-init actions)
-        run: sudo qemu-system-x86_64 -enable-kvm -cpu host -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img` -drive format=raw,file=init.img
+        run: sudo qemu-system-x86_64 -enable-kvm -cpu host -net none -netdev user,id=net0 -device virtio-net-pci,netdev=net0 -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img` -drive format=raw,file=init.img
       - name: Run target OS
-        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img`
+        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net none -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0 -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img`
       - name: Check that target OS is running
         run: |
           sleep 1
@@ -222,7 +227,7 @@ jobs:
       - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -enable-kvm -cpu host -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img` -drive format=raw,file=init.img
       - name: Run target OS
-        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img`
+        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net none -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0 -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img`
       - name: Check that target OS is running
         run: |
           sleep 1
