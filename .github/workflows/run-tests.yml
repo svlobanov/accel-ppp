@@ -93,7 +93,7 @@ jobs:
       - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -enable-kvm -cpu host -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img` -drive format=raw,file=init.img
       - name: Run target OS
-        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img`
+        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=${{ matrix.format }},file=img/`ls -1 img`
       - name: Check that target OS is running
         run: |
           sleep 1
@@ -227,7 +227,7 @@ jobs:
       - name: Run target OS first time (for cloud-init actions)
         run: sudo qemu-system-x86_64 -enable-kvm -cpu host -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img` -drive format=raw,file=init.img
       - name: Run target OS
-        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img`
+        run: sudo screen -dmS qemu qemu-system-x86_64 -enable-kvm -cpu host -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 -m 4096 -nographic -drive format=qcow2,file=img/`ls -1 img`
       - name: Check that target OS is running
         run: |
           sleep 1
